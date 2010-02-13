@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.7.4")
+(defconst scim-mode-version "0.7.4.1")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1279,7 +1279,7 @@ If STRING is empty or nil, the documentation string is left original."
 	       (integerp (car (cdr prev-list))))
       (if scim-debug (scim-show-undo-list "get rid of point setting entry"))
       (setcdr prev-list (cdr (cdr prev-list))))
-    (insert str)
+    (insert-and-inherit str)
     (if scim-debug (scim-show-undo-list "insert string: %S" str))
     (when (integerp (car (cdr-safe buffer-undo-list)))
       (if scim-debug (scim-show-undo-list "get rid of point setting entry"))
@@ -1934,7 +1934,7 @@ i.e. input focus is in this window."
 	    (overlays-at scim-preedit-point))
       (undo-boundary)
       (condition-case err
-	  (insert str)
+	  (insert-and-inherit str)
 	(text-read-only
 	 (scim-message "Failed to insert preediting text %s" err)
 	 (scim-cleanup-preedit)
@@ -2508,7 +2508,7 @@ i.e. input focus is in this window."
     (table-recognize-cell 'force)
     (eval (macroexpand ; Avoid byte-compile warnings for `table-with-cache-buffer'
 	   '(table-with-cache-buffer
-	     (insert string)
+	     (insert-and-inherit string)
 	     (table--untabify (point-min) (point-max))
 	     (table--fill-region (point-min) (point-max))
 	     (setq table-inhibit-auto-fill-paragraph t))))
@@ -2532,7 +2532,7 @@ i.e. input focus is in this window."
 		 table-mode-indicator)
 	    (scim-*table--cell-insert scim-committed-string))
 	   (scim-undo-by-committed-string
-	    (insert scim-committed-string))
+	    (insert-and-inherit scim-committed-string))
 	   (t
 	    (scim-insert-and-modify-undo-list scim-committed-string)))
 	  (setq scim-last-command 'self-insert-command)
@@ -2631,7 +2631,7 @@ i.e. input focus is in this window."
 	   (t
 	    (delete-region beg end)
 	    (goto-char beg)
-	    (insert string)))
+	    (insert-and-inherit string)))
 	(text-read-only
 	 (scim-message "Failed to replace surrounding text %s" err)
 	 (setq retval nil
