@@ -2831,7 +2831,10 @@ i.e. input focus is in this window."
 (defadvice isearch-other-control-char
   (around scim-isearch-other-control-char ())
   (if (and scim-mode
-	   (lookup-key scim-mode-map (this-command-keys)))
+	   ;; `lookup-key' returns nil if KEY is undefined.
+	   ;; Otherwise, returns a number if KEY is too long
+	   ;; (this maybe means the case that KEY is mouse event).
+	   (functionp (lookup-key scim-mode-map (this-command-keys))))
       (scim-isearch-other-control-char)
     ad-do-it))
 
