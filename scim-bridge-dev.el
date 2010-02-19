@@ -2720,8 +2720,9 @@ i.e. input focus is in this window."
 	(kill-local-variable 'post-command-hook)))
     (unless (memq 'scim-check-current-buffer
 		  (default-value 'post-command-hook))
-      (if scim-debug (scim-message "`post-command-hook' was reset. now add the hook again."))
-      (add-hook 'post-command-hook 'scim-check-current-buffer))))
+      (if (y-or-n-p "SCIM: `post-command-hook' was reset for some reasons. Try to repair this? ")
+	  (add-hook 'post-command-hook 'scim-check-current-buffer)
+      (scim-mode-off)))))
 
 (defun scim-handle-event (&optional arg)
   (interactive "*p")
