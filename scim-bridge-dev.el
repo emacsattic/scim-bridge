@@ -1714,7 +1714,8 @@ is quite slower than `scim-frame-header-height'."
   "Return the screen pxel position of point as (X . Y).
 Its values show the coordinates of lower left corner of the character."
 ;  (if scim-debug (scim-message "current-buffer: %s  pos: %d" (current-buffer) (point)))
-  (let ((x-y (or (posn-x-y (posn-at-point))
+  (let* ((posn (posn-at-point))
+	 (x-y (or (posn-x-y posn)
 		 '(0 . 0))))
 ;    (if scim-debug (scim-message "(x . y): %s" x-y))
     (cons (+ (frame-parameter nil 'left)
@@ -1726,7 +1727,16 @@ Its values show the coordinates of lower left corner of the character."
 	     (scim-frame-header-height)
 	     (car (cdr (window-pixel-edges)))
 	     (cdr x-y)
-	     (frame-char-height)))))
+	     (or (and (null header-line-format)
+		      (cdr (posn-object-width-height posn)))
+		 ;; `posn-object-width-height' returns an incorrect value
+		 ;; when the header line is displayed (Emacs bug #4426).
+		 ;; In this case, `frame-header-height' is used substitutively,
+		 ;; but this function doesn't return actual character height.
+		 (frame-char-height))))))
+
+;;; TODO: FIXME: Does anyone know how to get the actual character height
+;;;              even if the header line is displayed?
 
 (defun scim-get-gnome-font-size ()
   "Return the pixel size of application font in the GNOME desktop
