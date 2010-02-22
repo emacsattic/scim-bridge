@@ -2529,11 +2529,19 @@ i.e. input focus is in this window."
     (condition-case err
 	(progn
 	  (cond
+	   ;; ansi-term
+	   ((and (eq major-mode 'term-mode)
+		 (get-buffer-process (current-buffer)))
+	    (with-no-warnings
+	      (term-send-raw-string scim-committed-string)))
+	   ;; table-mode
 	   ((and (boundp 'table-mode-indicator)
 		 table-mode-indicator)
 	    (scim-*table--cell-insert scim-committed-string))
+	   ;; Normal commit
 	   (scim-undo-by-committed-string
 	    (insert-and-inherit scim-committed-string))
+	   ;; Normal commit (Undoing will be performed every 20 characters)
 	   (t
 	    (scim-insert-and-modify-undo-list scim-committed-string)))
 	  (setq scim-last-command 'self-insert-command)
