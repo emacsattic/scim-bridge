@@ -449,7 +449,7 @@ This function might be invoked just after using SCIM GUI Setup Utility.")
 
 (scim-set-function-doc
  'scim-get-frame-extents
- "Return the pixel width of frame edges as (left right top bottom).
+ "Return the pixel width of frame edges as vector [left right top bottom].
 Here, `top' also indicates the hight of frame title bar.")
 
 (scim-set-function-doc

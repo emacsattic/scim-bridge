@@ -418,7 +418,7 @@
 
 (scim-set-function-doc
  'scim-get-frame-extents
- "以 (左边 右边 顶部 底部) 的形式返回框架边缘的像素宽度.
+ "以矢量 [左边 右边 顶部 底部] 的形式返回框架边缘的像素宽度.
 这里 `顶部' 是指定框架标题栏的高度.")
 
 (scim-set-function-doc

@@ -499,8 +499,8 @@ KEY が配列として与えられた場合は、キーシーケンスを表す�
 
 (scim-set-function-doc
  'scim-get-frame-extents
- "フレームの外縁の幅のピクセル数を (left right top bottom) という形で返し
-ます。ここで、`top' はフレームのタイトルバーの高さでもあります。")
+ "フレームの外縁の幅のピクセル数をベクトル [left right top bottom] という形で
+返します。ここで、`top' はフレームのタイトルバーの高さでもあります。")
 
 (scim-set-function-doc
  'scim-frame-header-height

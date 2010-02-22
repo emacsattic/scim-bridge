@@ -1058,7 +1058,7 @@ use either \\[customize] or the function `scim-mode'."
 (defvar scim-preedit-default-attr nil)
 (defvar scim-preedit-overlays nil)
 (defvar scim-committed-string "")
-(defvar scim-frame-extents '(0 0 0 0))
+(defvar scim-frame-extents [0 0 0 0])
 (defvar scim-adjust-window-x-offset 0)
 (defvar scim-adjust-window-y-offset 0)
 (defvar scim-surrounding-text-modified nil)
@@ -1364,9 +1364,9 @@ If STRING is empty or nil, the documentation string is left original."
     (setq scim-kana-ro-prev-x-keysym nil)))
 
 (defun scim-get-keyboard-layout ()
-  (let ((kbd (shell-command-to-string
-	      "xprop -root _XKB_RULES_NAMES | sed -n 's/.* = \"[^\"]*\", *\"\\([^\"]*\\)\".*/\\1/p'")))
-    (unless (string= kbd "") (intern (substring kbd 0 -1)))))
+  (let ((xkb-rules (x-window-property "_XKB_RULES_NAMES" nil "STRING" 0 nil nil)))
+    (if xkb-rules
+	(intern (cadr (split-string xkb-rules "\0" t))))))
 
 (defun scim-update-kana-ro-key (&optional inhibit delayed)
   (when (eq scim-keyboard-layout 'jp106)
@@ -1645,42 +1645,31 @@ This function might be invoked just after using SCIM GUI Setup Utility."
     (setq-default scim-imcontext-status nil))
   (scim-update-cursor-color))
 
-;(defun scim-title-bar-height ()
-;  "Return the pixel hight of title bar of selected frame."
-;  (let* ((window-id (frame-parameter nil 'outer-window-id))
-;	 (line (shell-command-to-string
-;		(concat "xprop -id " window-id " _NET_FRAME_EXTENTS"))))
-;    (string-to-number (substring line
-;				 (string-match "[0-9]+,[ 0-9]+$" line)
-;				 (string-match ",[ 0-9]+$" line)))))
-
 (defun scim-get-frame-extents ()
-  "Return the pixel width of frame edges as (left right top bottom).
+  "Return the pixel width of frame edges as vector [left right top bottom].
 Here, `top' also indicates the hight of frame title bar."
   (if scim-debug (scim-message "get frame extents"))
-  (let* ((window-id (frame-parameter nil 'outer-window-id))
-	 (line (shell-command-to-string
-		(concat "xprop -id " window-id " _NET_FRAME_EXTENTS")))
-	 (start (string-match "[0-9]" line)))
-    (if start
-	(mapcar 'string-to-number
-		(split-string (substring line start -1) ","))
-      ;; `_NET_FRAME_EXTENTS' not supported
-      (let* ((line (shell-command-to-string
-		    (concat "xwininfo -id " window-id
-			    " | grep 'Relative upper-left'")))
-	     (x (string-to-number
-		 (substring line (+ (string-match "X:" line) 3))))
-	     (y (string-to-number
-		 (substring line (+ (string-match "Y:" line) 3)))))
-	(list x x y 0)))))
+  (let ((window-id (frame-parameter nil 'outer-window-id)))
+    (or (x-window-property "_NET_FRAME_EXTENTS" nil "CARDINAL"
+			   (string-to-number window-id) nil t)
+	;; If window manager doesn't support `_NET_FRAME_EXTENTS' property,
+	;; shell command `xwininfo' is used substitutively but it might
+	;; return incorrect value.
+	(let* ((line (shell-command-to-string
+		      (concat "xwininfo -id " window-id
+			      " | grep 'Relative upper-left'")))
+	       (x (string-to-number
+		   (substring line (+ (string-match "X:" line) 3))))
+	       (y (string-to-number
+		   (substring line (+ (string-match "Y:" line) 3)))))
+	  (vector x x y 0)))))
 
 (defun scim-save-frame-extents ()
   (setq scim-frame-extents (if (frame-parameter nil 'parent-id)
 			       ;; no display effect
 			       (scim-get-frame-extents)
 			     ;; with Compiz fusion effects
-			     '(0 0 0 0))))
+			     [0 0 0 0])))
 
 (defun scim-frame-header-height ()
   "Return the total of pixel height of menu-bar and tool-bar.
@@ -1719,11 +1708,11 @@ Its values show the coordinates of lower left corner of the character."
 		 '(0 . 0))))
 ;    (if scim-debug (scim-message "(x . y): %s" x-y))
     (cons (+ (frame-parameter nil 'left)
-	     (car scim-frame-extents)
+	     (aref scim-frame-extents 0)
 	     (car (window-inside-pixel-edges))
 	     (car x-y))
 	  (+ (frame-parameter nil 'top)
-	     (nth 2 scim-frame-extents)
+	     (aref scim-frame-extents 2)
 	     (scim-frame-header-height)
 	     (car (cdr (window-pixel-edges)))
 	     (cdr x-y)
@@ -1768,12 +1757,14 @@ i.e. input focus is in this window."
   (if scim-net-active-window-unsupported
       (string-to-number
        (shell-command-to-string
+	;; If window manager doesn't support `_NET_ACTIVE_WINDOW' property,
+	;; shell command `xwininfo' is used substitutively but it might
+	;; return incorrect value.
 	"xwininfo -root -children -int | grep -v '\"scim-panel-gtk\"\\|\"tomoe\"\\|\"nagisa\"\\|(has no name)' | grep ' children:$' -A 1 | tail -n 1"))
-    (let* ((line (shell-command-to-string "xprop -root _NET_ACTIVE_WINDOW"))
-	   (pos (string-match "[0-9a-fA-F]+$" line)))
-      (if pos
-	  (scim-hexstr-to-number (substring line pos -1))
-	(scim-message "Active window ID cannot be obtained by `xprop'. Instead, `xwininfo' is used.")
+    (let ((x-active-window (x-window-property "_NET_ACTIVE_WINDOW" nil "WINDOW" 0 nil t)))
+      (if x-active-window
+	  (+ (ash (car x-active-window) 16)  (cdr x-active-window))
+	(scim-message "Your window manager doesn't suppot _NET_ACTIVE_WINDOW property.")
 	(setq scim-net-active-window-unsupported t)
 	(scim-get-active-window-id)))))
 
