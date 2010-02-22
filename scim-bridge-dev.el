@@ -1240,24 +1240,26 @@ If STRING is empty or nil, the documentation string is left original."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Messages & Log
-(defmacro scim-message (format-string &rest args)
-  `(if (not scim-debug)
-       (message (concat "SCIM: " ,format-string) ,@args)
-     (let ((log-str (format ,format-string ,@args)))
-       (save-excursion
-	 (set-buffer (get-buffer-create scim-log-buffer))
-	 (goto-char (point-max))
-	 (insert (concat (format log-str) "\n"))))))
+(defun scim-message (format-string &rest args)
+  (if (not scim-debug)
+      (apply 'message (concat "SCIM: " format-string) args)
+    (let ((log-str (apply 'format format-string args)))
+      (with-current-buffer (get-buffer-create scim-log-buffer)
+	(let ((window (get-buffer-window (current-buffer))))
+	  (save-selected-window
+	    (if window (select-window window))
+	    (goto-char (point-max))
+	    (insert (concat (format log-str) "\n"))
+	    (if window (recenter -1))))))))
 
-(defmacro scim-show-undo-list (format-string &rest args)
-  `(progn
-     (scim-message ,format-string ,@args)
-     (if (not (listp buffer-undo-list))
-	 (scim-message "undo list (disabled): %s" buffer-undo-list)
-       (scim-message " top: %s" (car buffer-undo-list))
-       (scim-message " 2nd: %s" (car (cdr buffer-undo-list)))
-       (scim-message " 3rd: %s" (car (cdr (cdr buffer-undo-list))))
-       (scim-message " 4th: %s" (car (cdr (cdr (cdr buffer-undo-list))))))))
+(defun scim-show-undo-list (format-string &rest args)
+  (apply 'scim-message format-string args)
+  (if (not (listp buffer-undo-list))
+      (scim-message "undo list (disabled): %s" buffer-undo-list)
+    (scim-message " top: %s" (car buffer-undo-list))
+    (scim-message " 2nd: %s" (car (cdr buffer-undo-list)))
+    (scim-message " 3rd: %s" (car (cdr (cdr buffer-undo-list))))
+    (scim-message " 4th: %s" (car (cdr (cdr (cdr buffer-undo-list)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Control buffer-undo-list
