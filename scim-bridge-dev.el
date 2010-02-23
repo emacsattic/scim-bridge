@@ -1164,31 +1164,6 @@ use either \\[customize] or the function `scim-mode'."
       (setq modifiers (cdr modifiers)))
     (if bas (event-convert-list (nconc mods (list bas))))))
 
-(defconst scim-hex-table
-  (vconcat (make-vector ?0 0)
-	   [0 1 2 3 4 5 6 7 8 9]
-	   (make-vector (- ?A ?9 1) 0)
-	   [10 11 12 13 14 15]
-	   (make-vector (- ?a ?F 1) 0)
-	   [10 11 12 13 14 15]
-	   (make-vector (- 127 ?f) 0)))
-
-(defun scim-hexstr-to-number (string)
-  (let ((len (length string))
-	(ret 0)	(pos 0))
-    (while (< (setq ret (+ (* ret 16)
-			   (aref scim-hex-table (aref string pos)))
-		    pos (1+ pos))
-	      len))
-    ret))
-
-;(defun scim-hexstr-to-number (string &optional length)
-;  (let ((pos (1- (or length (length string)))))
-;    (+ (if (= pos 0)
-;	   0
-;	 (* 16 (scim-hexstr-to-number string pos)))
-;       (aref scim-hex-table (aref string pos)))))
-
 (defun scim-twos-complement (string)
   (let ((num (string-to-number string)))
     (if (< num 2147483648.0)
