@@ -1746,8 +1746,7 @@ i.e. input focus is in this window."
 	(scim-get-active-window-id)))))
 
 (defun scim-config-file-timestamp ()
-  (let ((time (nth 5 (file-attributes scim-config-file))))
-    (+ (* (car time) 65536) (cadr time))))
+  (nth 5 (file-attributes scim-config-file)))
 
 (defun scim-check-frame-focus (&optional focus-in)
   (let ((window-id (string-to-number
@@ -1758,7 +1757,8 @@ i.e. input focus is in this window."
       (if stat-toggled
 	  (when (and (not scim-frame-focus)
 		     scim-config-last-modtime
-		     (> (scim-config-file-timestamp) scim-config-last-modtime))
+		     (time-less-p
+		      scim-config-last-modtime (scim-config-file-timestamp)))
 	    (if scim-debug (scim-message "SCIM's settings changed"))
 	    (scim-reset-imcontext-statuses))
 	(setq scim-config-last-modtime (scim-config-file-timestamp)))
