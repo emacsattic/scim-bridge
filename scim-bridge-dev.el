@@ -1230,11 +1230,11 @@ If STRING is empty or nil, the documentation string is left original."
 (defun scim-show-undo-list (format-string &rest args)
   (apply 'scim-message format-string args)
   (if (not (listp buffer-undo-list))
-      (scim-message "undo list (disabled): %s" buffer-undo-list)
-    (scim-message " top: %s" (car buffer-undo-list))
-    (scim-message " 2nd: %s" (car (cdr buffer-undo-list)))
-    (scim-message " 3rd: %s" (car (cdr (cdr buffer-undo-list))))
-    (scim-message " 4th: %s" (car (cdr (cdr (cdr buffer-undo-list)))))))
+      (scim-message "undo list (disabled): %S" buffer-undo-list)
+    (scim-message " top: %S" (car buffer-undo-list))
+    (scim-message " 2nd: %S" (car (cdr buffer-undo-list)))
+    (scim-message " 3rd: %S" (car (cdr (cdr buffer-undo-list))))
+    (scim-message " 4th: %S" (car (cdr (cdr (cdr buffer-undo-list)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Control buffer-undo-list
@@ -1571,7 +1571,7 @@ restart scim-mode so that this settings may become effective."
 		    viper-mode
 		    (eq (with-no-warnings viper-current-state) 'insert-state)))
 	(orig-frame (selected-frame)))
-    (if scim-debug (scim-message "set cursor color: %s" color))
+    (if scim-debug (scim-message "set cursor color: %S" color))
     (condition-case err
 	(while (progn
 		 (unless single-frame
@@ -1589,7 +1589,7 @@ restart scim-mode so that this settings may become effective."
 		 (not (eq (selected-frame) orig-frame))))
       (error
 	(select-frame orig-frame)
-	(scim-message "Failed to set cursor color %s" err)))))
+	(scim-message "Failed to set cursor color %S" err)))))
 
 (defun scim-update-cursor-color (&optional single-frame)
   (if (and scim-cursor-color
@@ -1679,7 +1679,7 @@ is quite slower than `scim-frame-header-height'."
 (defun scim-compute-pixel-position ()
   "Return the screen pxel position of point as (X . Y).
 Its values show the coordinates of lower left corner of the character."
-;  (if scim-debug (scim-message "current-buffer: %s  pos: %d" (current-buffer) (point)))
+;  (if scim-debug (scim-message "current-buffer: %S  pos: %d" (current-buffer) (point)))
   (let* ((posn (posn-at-point))
 	 (x-y (or (posn-x-y posn)
 		 '(0 . 0))))
@@ -1763,8 +1763,8 @@ i.e. input focus is in this window."
 	    (scim-reset-imcontext-statuses))
 	(setq scim-config-last-modtime (scim-config-file-timestamp)))
       (setq scim-frame-focus stat-toggled)
-      (if scim-debug (scim-message "change focus: %s" (and scim-frame-focus (current-buffer))))
-      (if scim-debug (scim-message "scim-current-buffer: %s" scim-current-buffer))
+      (if scim-debug (scim-message "change focus: %S" (and scim-frame-focus (current-buffer))))
+      (if scim-debug (scim-message "scim-current-buffer: %S" scim-current-buffer))
       (when (and (stringp scim-imcontext-id)
 		 (eq (current-buffer) scim-current-buffer))
 	(when (and scim-use-kana-ro-key
@@ -1842,7 +1842,7 @@ i.e. input focus is in this window."
 	      (when func
 		(funcall func))))
 	(error
-	 (scim-message "Failed to delete preediting text %s" err)))))
+	 (scim-message "Failed to delete preediting text %S" err)))))
   (mapc 'delete-overlay scim-preedit-overlays)
   (when (local-variable-p 'scim-cursor-type-saved)
     (if (eq scim-cursor-type-saved 1)
@@ -1914,7 +1914,7 @@ i.e. input focus is in this window."
       (condition-case err
 	  (insert-and-inherit str)
 	(text-read-only
-	 (scim-message "Failed to insert preediting text %s" err)
+	 (scim-message "Failed to insert preediting text %S" err)
 	 (scim-cleanup-preedit)
 	 (let ((scim-string-insertion-failed nil))
 	   (scim-reset-imcontext))
@@ -1964,7 +1964,7 @@ i.e. input focus is in this window."
 					     (eq beg 0) (eq end max))
 					(cons fc flat-attr)
 				      t)))
-		(scim-message "Unable to set attribute \"%s %s\"." type value))))
+		(scim-message "Unable to set attribute %S %S." type value))))
 	  ;; This modification hook must be registered as a global hook because
 	  ;; local hooks might be reset when major mode is changed.
 	  (add-hook 'before-change-functions 'scim-before-change-function)
@@ -1972,8 +1972,8 @@ i.e. input focus is in this window."
 			      'none)
 		scim-preedit-default-attr (or scim-preedit-default-attr
 					      flat-attr))
-	  (if scim-debug (scim-message "default attr: %s" scim-preedit-default-attr))
-	  (if scim-debug (scim-message "current attr: %s" flat-attr))
+	  (if scim-debug (scim-message "default attr: %S" scim-preedit-default-attr))
+	  (if scim-debug (scim-message "current attr: %S" flat-attr))
 	  (if (or (eq flat-attr t)
 		  (not (equal flat-attr scim-preedit-default-attr)))
 	      ;; When conversion candidate is shown
@@ -1999,7 +1999,7 @@ i.e. input focus is in this window."
 
 (defun scim-do-update-preedit ()
   (when scim-preedit-update
-    (if scim-debug (scim-message "preedit-update  win-buf: %s  cur-buf: %s  cmd-buf: %s  str: \"%s\"" (window-buffer) (current-buffer) scim-current-buffer scim-preedit-string))
+    (if scim-debug (scim-message "preedit-update  win-buf: %S  cur-buf: %S  cmd-buf: %S  str: %S" (window-buffer) (current-buffer) scim-current-buffer scim-preedit-string))
     (scim-show-preedit)
     (unless scim-string-insertion-failed
       (scim-preedit-updated))))
@@ -2039,7 +2039,7 @@ i.e. input focus is in this window."
       ;; Change focus if buffer is switched to another
       (unless (eq buffer scim-current-buffer)
 	;; Focus out
-	(if scim-debug (scim-message "buffer was changed from %s to %s" scim-current-buffer buffer))
+	(if scim-debug (scim-message "buffer was changed from %S to %S" scim-current-buffer buffer))
 	(when (buffer-live-p scim-current-buffer)
 	  (with-current-buffer scim-current-buffer
 	    (when (stringp scim-imcontext-id)
@@ -2055,7 +2055,7 @@ i.e. input focus is in this window."
 	(unless (or scim-imcontext-id
 		    (and (not (minibufferp buffer))
 			 (eq (aref (buffer-name buffer) 0) ?\ ))) ; Buffer invisible?
-	  (if scim-debug (scim-message "new buffer was detected: %s" buffer))
+	  (if scim-debug (scim-message "new buffer was detected: %S" buffer))
 	  (scim-register-imcontext))
 	;; Focus in if window is active
 	(when (stringp scim-imcontext-id)
@@ -2151,7 +2151,7 @@ i.e. input focus is in this window."
 		    nil))
 	    i (1+ i)))
     (unless (processp proc)
-      (scim-message "%s" error))
+      (scim-message "%S" error))
     proc))
 
 (defun scim-bridge-connect ()
@@ -2171,7 +2171,7 @@ i.e. input focus is in this window."
 	(set-process-sentinel proc 'scim-bridge-process-sentinel)
 	(with-current-buffer scim-tmp-buffer-name
 	  (setq scim-tmp-buffer (current-buffer))
-	  (if scim-debug (scim-message "temp buffer: %s" scim-tmp-buffer))
+	  (if scim-debug (scim-message "temp buffer: %S" scim-tmp-buffer))
 	  (unless scim-debug (buffer-disable-undo))
 	  (erase-buffer)
 	  ;; `make-local-hook' is an obsolete function (as of Emacs 21.1)
@@ -2223,7 +2223,7 @@ i.e. input focus is in this window."
   (condition-case err
       (process-send-string scim-bridge-socket (concat command "\n"))
     (error
-     (scim-message "Couldn't send command to agent %s" err))))
+     (scim-message "Couldn't send command to agent %S" err))))
 
 (defun scim-bridge-send-receive (command)
   (scim-bridge-send-only command)
@@ -2266,7 +2266,7 @@ i.e. input focus is in this window."
 	(setq scim-current-buffer nil))))
 
 (defun scim-reset-imcontext () ;(id)
-;  (if scim-debug (scim-message "buffer: %s" (current-buffer)))
+;  (if scim-debug (scim-message "buffer: %S" (current-buffer)))
   (scim-bridge-send-receive
    (concat "reset_imcontext " scim-imcontext-id)))
 
@@ -2341,7 +2341,7 @@ i.e. input focus is in this window."
 
 (defun scim-imcontext-registered (id)
   ;; Initialize IMContext
-  (if scim-debug (scim-message "imcontext registered (id: %s  buf: %s)" id (if scim-mode-local (current-buffer) "global")))
+  (if scim-debug (scim-message "imcontext registered (id: %s  buf: %S)" id (if scim-mode-local (current-buffer) "global")))
   (setq scim-imcontext-id id
 	scim-preedit-prev-string ""
 	scim-preedit-overlays nil)
@@ -2349,7 +2349,7 @@ i.e. input focus is in this window."
   (scim-set-preedit-mode))
 
 (defun scim-imcontext-deregister ()
-  (if scim-debug (scim-message "imcontext deregistered (id: %s  buf: %s)" scim-imcontext-id (if (local-variable-p 'scim-imcontext-id) (current-buffer) "global")))
+  (if scim-debug (scim-message "imcontext deregistered (id: %s  buf: %S)" scim-imcontext-id (if (local-variable-p 'scim-imcontext-id) (current-buffer) "global")))
   (if (local-variable-p 'scim-imcontext-id)
       (progn
 	(kill-local-variable 'scim-imcontext-id)
@@ -2476,7 +2476,7 @@ i.e. input focus is in this window."
 (defun scim-set-commit-string (id string)
   (if (not (string= id scim-imcontext-id))
       (scim-message "IMContext ID (%s) is mismatched." id)
-    (if scim-debug (scim-message "commit string: %s" string))
+    (if scim-debug (scim-message "commit string: %S" string))
     (setq scim-committed-string string)
     (run-hooks 'scim-set-commit-string-hook)))
 
@@ -2525,7 +2525,7 @@ i.e. input focus is in this window."
 	  (scim-string-commited)
 	  (run-hooks 'scim-commit-string-hook))
       (text-read-only
-       (scim-message "Failed to commit string %s" err)
+       (scim-message "Failed to commit string %S" err)
        (setq scim-string-insertion-failed t)))
     (scim-show-preedit t))))
 
@@ -2560,7 +2560,7 @@ i.e. input focus is in this window."
 	   (string (concat str-before str-after))
 	   (cursor (length str-before))
 	   (retval (> (length string) 0)))
-      (if scim-debug (scim-message "val: %s  str: %s  pos: %d" retval string cursor))
+      (if scim-debug (scim-message "val: %S  str: %S  pos: %d" retval string cursor))
       (scim-surrounding-text-gotten retval cursor string))))
 
 (defun scim-*table--cell-delete-region (beg end)
@@ -2589,7 +2589,7 @@ i.e. input focus is in this window."
 	   (t
 	    (delete-region beg end)))
 	(text-read-only
-	 (scim-message "Failed to delete surrounding text %s" err)
+	 (scim-message "Failed to delete surrounding text %S" err)
 	 (setq retval nil
 	       scim-string-insertion-failed t)))
       (scim-show-preedit t)
@@ -2619,7 +2619,7 @@ i.e. input focus is in this window."
 	    (goto-char beg)
 	    (insert-and-inherit string)))
 	(text-read-only
-	 (scim-message "Failed to replace surrounding text %s" err)
+	 (scim-message "Failed to replace surrounding text %S" err)
 	 (setq retval nil
 	       scim-string-insertion-failed t)))
       (goto-char pos)
@@ -2642,7 +2642,7 @@ i.e. input focus is in this window."
 	  (progn
 	    (if scim-debug (scim-message "execute: %s" args))
 	    (apply cmd (cdr args)))
-	(scim-message "Unknown command received from agent: %s" (car args))
+	(scim-message "Unknown command received from agent: %S" (car args))
 	))
     (setq cmdlist (cdr cmdlist)))
   (scim-do-update-preedit))
@@ -2670,7 +2670,7 @@ i.e. input focus is in this window."
     (when (numberp key-code)
       (unless scim-frame-focus (scim-check-frame-focus t))
       (scim-check-current-buffer))
-;    (if scim-debug (scim-message "event: %s" elist))
+;    (if scim-debug (scim-message "event: %S" elist))
     (if scim-debug (scim-message "event: %s" event))
     (when (member "kana_ro" modifiers)
       (setq event (event-convert-list
@@ -2783,7 +2783,7 @@ i.e. input focus is in this window."
     (setq str (read-string prompt isearch-string 'junk-hist nil t)
 	  isearch-string ""
 	  isearch-message "")
-    (if scim-debug (scim-message "isearch-string: %s" str))
+    (if scim-debug (scim-message "isearch-string: %S" str))
     (if (and str (> (length str) 0))
 	(let ((unread-command-events nil))
 	  (isearch-process-search-string str str))
