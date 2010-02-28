@@ -607,22 +607,27 @@ the milliseconds."
 (defvar scim-debug nil)
 (defvar scim-log-buffer "*scim-bridge-log*")
 
-;(defvar scim-bridge-socket-path "/tmp/scim-bridge-0.3.0.socket-1000@localhost:0.0")
+;; Definition of socket path
+;;  e.g. /tmp/scim-bridge-0.3.0.socket-1000@localhost:0.0
 (defvar scim-bridge-compat-version "0.3.0")
 (defvar scim-bridge-socket-dir "/tmp/")
 (defvar scim-bridge-socket-name "socket")
 (defvar scim-bridge-name "scim-bridge")
 (defvar scim-bridge-host-name "localhost")
-(defvar scim-bridge-x-display-name
-  (let* ((name (getenv "DISPLAY"))
-	 (display (substring name (string-match ":[0-9]+" name)))
-	 (screen (and (not (string-match "\\.[0-9]+$" display)) ".0")))
-    (concat display screen)))
-(defvar scim-bridge-socket-path
+(defvar scim-bridge-socket-path-common
   (concat scim-bridge-socket-dir scim-bridge-name "-"
 	  scim-bridge-compat-version "." scim-bridge-socket-name "-"
 	  (number-to-string (user-uid)) "@"
-	  scim-bridge-host-name scim-bridge-x-display-name))
+	  scim-bridge-host-name))
+(defvar scim-bridge-x-display-substitute nil
+  "Don't set this variable unless you want to explicitly specify the
+X display number and screen number.
+
+If you set this variable, the value must be a string such as \":0.0\".")
+
+(define-obsolete-variable-alias
+ 'scim-bridge-x-display-name 'scim-bridge-x-display-substitute
+ "Version 0.7.5")
 
 (defvar scim-config-file "~/.scim/config"
   "The name of SCIM's configuration file, which is used to detect
@@ -1542,6 +1547,16 @@ restart scim-mode so that this settings may become effective."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Control display
+(defun scim-get-x-display ()
+  ;; Don't use (frame-parameter nil 'display) because
+  ;; this expression returns nil if frame is on text-only terminal.
+  (let ((env (getenv "DISPLAY")))
+    (and env
+	 (or scim-bridge-x-display-substitute
+	     (let* ((display (substring env (string-match ":[0-9]+" env)))
+		    (screen (and (not (string-match "\\.[0-9]+$" display)) ".0")))
+	       (concat display screen))))))
+
 (defun scim-update-mode-line ()
   (force-mode-line-update)
   scim-mode) ; Return value
@@ -2129,18 +2144,19 @@ i.e. input focus is in this window."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Connect
 (defun scim-bridge-connect-internal ()
-  (unless (file-exists-p scim-bridge-socket-path)
-    (scim-message "Launch SCIM-Bridge..."))
-  (call-process-shell-command scim-bridge-name nil 0 nil "--noexit")
-  (let ((i 0)
+  (let ((socket (concat scim-bridge-socket-path-common (scim-get-x-display)))
+	(i 0)
 	proc error)
+    (unless (file-exists-p socket)
+      (scim-message "Launch SCIM-Bridge..."))
+    (call-process-shell-command scim-bridge-name nil 0 nil "--noexit")
     (while (and (not (processp proc))
 		(< i 10)) ; Try connection 10 times at maximum
       (sleep-for (* 0.1 i))
       (setq proc (condition-case err
 		     (make-network-process
 		      :name scim-bridge-name
-		      :service scim-bridge-socket-path
+		      :service socket
 		      :buffer scim-tmp-buffer-name
 		      :family 'local :server nil :noquery t)
 		   (error
