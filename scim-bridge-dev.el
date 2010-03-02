@@ -2070,8 +2070,10 @@ i.e. input focus is in this window."
 	    (scim-deregister-imcontext)
 	  (let ((scim-current-buffer buffer))
 	    (scim-deregister-imcontext))))
-      ;; Change focus if buffer is switched to another
-      (unless (eq buffer scim-current-buffer)
+      ;; Change focus if buffer is switched to another one
+      ;; or non-X frame is selected
+      (unless (and (eq buffer scim-current-buffer)
+		   (eq window-system 'x))
 	;; Focus out
 	(if scim-debug (scim-message "buffer was changed from %S to %S" scim-current-buffer buffer))
 	(when (buffer-live-p scim-current-buffer)
