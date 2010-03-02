@@ -1564,12 +1564,17 @@ restart scim-mode so that this settings may become effective."
 
 (defun scim-set-cursor-color (&optional single-frame)
   (let ((color (cond
+		;;    |      `scim-cursor-color'     |   ON   |   OFF  |Disabled|
+		;;    +------------------------------+--------+--------+--------+
+		;;    |              nil             |  none  |  none  |  none  |
 		((or (null scim-cursor-color)
 		     (null scim-imcontext-id))
 		 nil)
+		;;    |           "color1"           | color1 |  none  |  none  |
 		((stringp scim-cursor-color)
 		 (if scim-imcontext-status
 		     scim-cursor-color))
+		;;    |    ("color1" . "color2")     | color1 | color2 | color2 |
 		((consp scim-cursor-color)
 		 (let ((tail (cdr scim-cursor-color)))
 		   (cond
@@ -1577,6 +1582,8 @@ restart scim-mode so that this settings may become effective."
 		     (if scim-imcontext-status
 			 (car scim-cursor-color)
 		       tail))
+		    ;;|     ("color1" "color2")      | color1 | color2 |  none  |
+		    ;;| ("color1" "color2" "color3") | color1 | color2 | color3 |
 		    ((consp tail)
 		     (if scim-mode-map-prev-disabled
 			 (cadr tail)
@@ -1592,16 +1599,17 @@ restart scim-mode so that this settings may become effective."
 	(while (progn
 		 (unless single-frame
 		   (select-frame (next-frame nil t)))
-		 (let ((color (or color
-				  (frame-parameter nil 'foreground-color))))
-		   (when (or (eq (window-buffer (frame-selected-window))
-				 scim-current-buffer)
-			     (not scim-mode))
-		     (if viper
-			 (with-no-warnings
-			   (setq viper-insert-state-cursor-color color)
-			   (viper-set-cursor-color-according-to-state))
-		       (set-cursor-color color))))
+		 (if (eq window-system 'x)
+		     (let ((color (or color
+				      (frame-parameter nil 'foreground-color))))
+		       (if (or (eq (window-buffer (frame-selected-window))
+				   scim-current-buffer)
+			       (not scim-mode))
+			   (if viper
+			       (with-no-warnings
+				 (setq viper-insert-state-cursor-color color)
+				 (viper-set-cursor-color-according-to-state))
+			     (set-cursor-color color)))))
 		 (not (eq (selected-frame) orig-frame))))
       (error
 	(select-frame orig-frame)
