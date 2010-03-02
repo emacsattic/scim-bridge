@@ -647,7 +647,7 @@ value manually before scim-bridge.el is loaded.")
   "When these hooks run, scim-mode-map become inactive.")
 
 (defvar scim-undo-command-list
-  '(undo undo-only redo)
+  '(undo undo-only redo undo-tree-undo undo-tree-redo)
   "These commands are made unusable when the preediting area exists.")
 
 (defvar scim-reply-alist
