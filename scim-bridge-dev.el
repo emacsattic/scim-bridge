@@ -1320,7 +1320,8 @@ If STRING is empty or nil, the documentation string is left original."
 (defun scim-set-keymap-parent ()
   (set-keymap-parent scim-mode-map
 		     (cond
-		      (scim-mode-map-prev-disabled
+		      ((or (not scim-frame-focus)
+			   scim-mode-map-prev-disabled)
 		       nil)
 		      ((or (not scim-use-minimum-keymap)
 			   scim-imcontext-status)
@@ -1755,7 +1756,10 @@ i.e. input focus is in this window."
 	"xwininfo -root -children -int | grep -v '\"scim-panel-gtk\"\\|\"tomoe\"\\|\"nagisa\"\\|(has no name)' | grep ' children:$' -A 1 | tail -n 1"))
     (let ((x-active-window (x-window-property "_NET_ACTIVE_WINDOW" nil "WINDOW" 0 nil t)))
       (if x-active-window
-	  (+ (ash (car x-active-window) 16)  (cdr x-active-window))
+	  ;; It's possible that `x-active-window' take the value of 0. Why?
+	  (condition-case err
+	      (+ (ash (car x-active-window) 16)  (cdr x-active-window))
+	    (wrong-type-argument -1))
 	(scim-message "Your window manager doesn't suppot _NET_ACTIVE_WINDOW property.")
 	(setq scim-net-active-window-unsupported t)
 	(scim-get-active-window-id)))))
@@ -1764,12 +1768,15 @@ i.e. input focus is in this window."
   (nth 5 (file-attributes scim-config-file)))
 
 (defun scim-check-frame-focus (&optional focus-in)
-  (let ((window-id (string-to-number
-		    (frame-parameter nil 'outer-window-id)))
-	(active-win (scim-get-active-window-id))
-	(stat-toggled (or (not scim-frame-focus) focus-in)))
-    (when (eq (eq window-id active-win) stat-toggled)
-      (if stat-toggled
+  (let* ((x-frame (eq window-system 'x))
+	 (window-id (and x-frame
+			 (string-to-number
+			  (frame-parameter nil 'outer-window-id))))
+	 (active-win (or (not x-frame)
+			 (scim-get-active-window-id)))
+	 (new-focus (or (not scim-frame-focus) focus-in)))
+    (when (eq (eq window-id active-win) new-focus)
+      (if new-focus
 	  (when (and (not scim-frame-focus)
 		     scim-config-last-modtime
 		     (time-less-p
@@ -1777,14 +1784,17 @@ i.e. input focus is in this window."
 	    (if scim-debug (scim-message "SCIM's settings changed"))
 	    (scim-reset-imcontext-statuses))
 	(setq scim-config-last-modtime (scim-config-file-timestamp)))
-      (setq scim-frame-focus stat-toggled)
-      (if scim-debug (scim-message "change focus: %S" (and scim-frame-focus (current-buffer))))
-      (if scim-debug (scim-message "scim-current-buffer: %S" scim-current-buffer))
       (when (and (stringp scim-imcontext-id)
 		 (eq (current-buffer) scim-current-buffer))
+	(setq scim-frame-focus new-focus)
+	(if scim-debug (scim-message "change focus: %S" (and scim-frame-focus (current-buffer))))
+	(if scim-debug (scim-message "scim-current-buffer: %S" scim-current-buffer))
+	(if scim-frame-focus
+	    (setq scim-keyboard-layout (scim-get-keyboard-layout)))
 	(when (and scim-use-kana-ro-key
 		   scim-kana-ro-x-keysym)
 	  (scim-update-kana-ro-key nil t))
+	(scim-set-keymap-parent)
 	(let ((preediting-p scim-preediting-p))
 	  (scim-change-focus scim-frame-focus) ; Send
 	  (unless preediting-p
@@ -1910,7 +1920,8 @@ i.e. input focus is in this window."
 		(equal attrs scim-preedit-prev-attributes)))
       (if scim-preediting-p
 	  (scim-remove-preedit)
-	(scim-set-window-y-offset)
+	(if (eq window-system 'x)
+	    (scim-set-window-y-offset))
 	(unless scim-surrounding-text-modified
 	  (if scim-debug (scim-message "cleanup base attribute"))
 	  (setq scim-preedit-default-attr nil)))
@@ -2910,7 +2921,8 @@ i.e. input focus is in this window."
 
 (defun scim-mode-on ()
   (interactive)
-  (if (not window-system)
+  (if (not (or (eq window-system 'x)
+	       (getenv "DISPLAY")))
       (scim-mode-quit)
     (if scim-bridge-socket (scim-mode-off)) ; Restart scim-mode
     (unwind-protect
@@ -2923,11 +2935,11 @@ i.e. input focus is in this window."
 	;; Turn on minor mode
 	(setq-default scim-mode t)
 	(scim-cleanup-variables)
+	(setq scim-frame-focus nil)
 	(setq scim-selected-frame (selected-frame))
 	(scim-activate-advices-undo t)
 	(scim-setup-isearch)
 	;; Initialize key bindings
-	(setq scim-keyboard-layout (scim-get-keyboard-layout))
 	(scim-update-key-bindings)
 	(scim-set-mode-map-alist)
 	(add-to-ordered-list
@@ -2998,9 +3010,11 @@ i.e. input focus is in this window."
 With optional argument ARG, turn scim-mode on if ARG is
 positive, otherwise turn it off."
   (interactive "P")
-  (if (not (or window-system scim-mode))
+  (if (not (or (eq window-system 'x)
+	       (getenv "DISPLAY")
+	       scim-mode))
       (prog1 nil
-	(scim-message "scim-mode needs Emacs to run as X application."))
+	(scim-message "scim-mode needs Emacs to run under X session."))
     (setq-default scim-mode
 		  (if (null arg)
 		      (not scim-mode)
