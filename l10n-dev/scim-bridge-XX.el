@@ -1,13 +1,13 @@
 ;;; scim-bridge-XX.el
 
-;; Copyright (C) 2008, 2009 S. Irie
+;; Copyright (C) 2008, 2009, 2010 S. Irie
 ;; Copyright (C) YEAR TRANSLATOR
 
 ;; Author: S. Irie
 ;; Maintainer: TRANSLATOR
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-XX-version "0.7.4")
+(defconst scim-bridge-XX-version "0.7.5")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -37,14 +37,18 @@
 ;; History:
 ;; YEAR-MM-DD  TRANSLATOR
 ;;         * First release
-;;         * Version 0.7.4
+;;         * Version 0.7.5
+;;
+;; 2010-03-02  S. Irie
+;;         * Modify entries
+;;         * Version 0.7.5
 ;;
 ;; 2009-01-27  S. Irie
 ;;         * Modify description of installation
 ;;         * Version 0.7.4
 ;;
 ;; 2008-12-19  S. Irie
-;;         * Add/modify/delete translations
+;;         * Add/modify/delete entries
 ;;         * Version 0.7.3
 ;;
 ;; 2008-11-28  S. Irie

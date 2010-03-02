@@ -6,7 +6,7 @@ EL_DEV="scim-bridge-dev.el"
 EL_MAIN="scim-bridge.el"
 DBGREGEXP="^;*\t* *(if scim-debug ("
 
-FILES=("README" "COPYING" "doc" "l10n")
+FILES=("README" "COPYING" "ChangeLog" "l10n" "l10n-dev")
 
 VERSION=$(sed -n 's/^(defconst scim-mode-version "\(.*\)")$/\1/p' scim-bridge-dev.el)
 ARCHDIR="scim-bridge-el-${VERSION}"
