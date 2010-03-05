@@ -1553,6 +1553,74 @@ multiple definitions of single keystroke.
 restart scim-mode so that this settings may become effective."
   (scim-define-key 'scim-preedit-function-key-list key handle))
 
+;; Advice for `describe-key'
+(defadvice describe-key
+  (around scim-describe-key ())
+  (when scim-mode
+    ;; Translate Jananese kana RO key
+    (if (commandp (lookup-key (scim-make-keymap-internal
+			       (scim-combine-modifiers
+				scim-kana-ro-key-symbol
+				'(meta control hyper super alt)))
+			      key))
+	(let ((mods (event-modifiers (aref key 0))))
+	  (setq key (vector
+		     (event-convert-list
+		      (delq 'shift
+			    (append mods (list (if (memq 'shift mods) 95 92)))))))))
+    ;; Translate function key
+    (let ((cmd1 (and (boundp 'local-function-key-map)
+		     (lookup-key local-function-key-map key))))
+      (if (commandp cmd1)
+	  (setq key cmd1)
+	(let ((cmd2 (lookup-key function-key-map key)))
+	  (if (commandp cmd2)
+	      (setq key cmd2)))))
+    ;; Set modified flag of *Help* buffer in order to detect
+    ;; whether *Help* is updated or not.
+    (when scim-mode
+      (with-current-buffer (help-buffer)
+	(set-buffer-modified-p t))))
+  ;; Invoke `describe-key' without scim-mode's keymaps
+  (let ((scim-mode-map-alist nil))
+    ad-do-it)
+  ;; Added descriptions to *Help* buffer, if any
+  (when scim-mode
+    (with-current-buffer (help-buffer)
+      (let* ((raw (vector (aref (this-single-command-raw-keys) 0)))
+	     (format (format "SCIM: scim-mode handles %s when %%s.\n"
+			     (key-description raw)))
+	     (preedit (lookup-key scim-mode-preedit-map raw))
+	     (common (lookup-key scim-mode-common-map raw))
+	     (minimum (lookup-key scim-mode-minimum-map raw))
+	     (inhibit-read-only t))
+	(when (or preedit common minimum)
+	  ;; Popup *Help* buffer if it was't updated
+	  (if (or (= (buffer-size) 0)
+		  (buffer-modified-p))
+	      (with-output-to-temp-buffer (help-buffer)
+		(princ (current-message))))
+	  ;; Insert above [BACK] button
+	  (goto-char (point-max))
+	  (beginning-of-line 0)
+	  ;; When *Help* is opened for the first time, [BACK] button doesn't appear
+	  (unless (get-text-property (point) 'button)
+	    (goto-char (point-max))
+	    (insert "\n"))
+	  (if (or preedit common)
+	      (insert (format format "preediting")))
+	  (if common
+	      (insert (format format "SCIM is active")))
+	  (if (if scim-use-minimum-keymap minimum common)
+	    (insert (format format "SCIM is not active")))
+	  (insert "\n"))))))
+
+(defun scim-activate-advice-describe-key (enable)
+  (if enable
+      (ad-enable-advice 'describe-key 'around 'scim-describe-key)
+    (ad-disable-advice 'describe-key 'around 'scim-describe-key))
+  (ad-activate 'describe-key))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Control display
 (defun scim-get-x-display ()
@@ -2955,6 +3023,7 @@ i.e. input focus is in this window."
 	(setq scim-frame-focus nil)
 	(setq scim-selected-frame (selected-frame))
 	(scim-activate-advices-undo t)
+	(scim-activate-advice-describe-key t)
 	(scim-setup-isearch)
 	;; Initialize key bindings
 	(scim-update-key-bindings)
@@ -2989,6 +3058,7 @@ i.e. input focus is in this window."
 	(delq 'scim-mode-map-alist emulation-mode-map-alists))
   (scim-update-kana-ro-key t)
   (scim-activate-advices-undo nil)
+  (scim-activate-advice-describe-key nil)
   (scim-disable-isearch)
   (scim-cancel-focus-update-timer)
   (scim-cleanup-preedit)
