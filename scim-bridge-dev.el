@@ -2927,7 +2927,7 @@ i.e. input focus is in this window."
 	   ;; `lookup-key' returns nil if KEY is undefined.
 	   ;; Otherwise, returns a number if KEY is too long
 	   ;; (this maybe means the case that KEY is mouse event).
-	   (functionp (lookup-key scim-mode-map (this-command-keys))))
+	   (commandp (lookup-key scim-mode-map (this-command-keys))))
       (scim-isearch-other-control-char)
     ad-do-it))
 
