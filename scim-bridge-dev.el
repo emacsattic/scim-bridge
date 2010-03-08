@@ -526,15 +526,6 @@ the cursor is on the bottom of screen."
 		 (const :tag "off" nil))
   :group 'scim-appearance)
 
-(defcustom scim-adjust-window-y-position
-  t
-  "If the value is non-nil, the vertical position of candidate window
-is adjusted to the bottom of cursor by using a shell command `xwininfo'.
-Otherwise, the adjustment isn't done and therefore the window might
-be displayed a little below from the exact location."
-  :type 'boolean
-  :group 'scim-appearance)
-
 (defcustom scim-prediction-window-position
   '(nil . nil)
   "(For Japanese IM only) The value should be given as (POS . ADJ).
@@ -1070,9 +1061,8 @@ use either \\[customize] or the function `scim-mode'."
 (defvar scim-preedit-default-attr nil)
 (defvar scim-preedit-overlays nil)
 (defvar scim-committed-string "")
-(defvar scim-frame-extents [0 0 0 0])
+(defvar scim-saved-frame-coordinates '(0 . 0))
 (defvar scim-adjust-window-x-offset 0)
-(defvar scim-adjust-window-y-offset 0)
 (defvar scim-surrounding-text-modified nil)
 (defvar scim-cursor-type-saved 0)
 (make-variable-buffer-local 'scim-cursor-type-saved)
@@ -1721,84 +1711,66 @@ This function might be invoked just after using SCIM GUI Setup Utility."
     (setq-default scim-imcontext-status nil))
   (scim-update-cursor-color))
 
-(defun scim-get-frame-extents ()
-  "Return the pixel width of frame edges as vector [left right top bottom].
-Here, `top' also indicates the hight of frame title bar."
-  (if scim-debug (scim-message "get frame extents"))
-  (let ((window-id (frame-parameter nil 'outer-window-id)))
-    (or (x-window-property "_NET_FRAME_EXTENTS" nil "CARDINAL"
-			   (string-to-number window-id) nil t)
-	;; If window manager doesn't support `_NET_FRAME_EXTENTS' property,
-	;; shell command `xwininfo' is used substitutively but it might
-	;; return incorrect value.
-	(let* ((line (shell-command-to-string
-		      (concat "xwininfo -id " window-id
-			      " | grep 'Relative upper-left'")))
-	       (x (string-to-number
-		   (substring line (+ (string-match "X:" line) 3))))
-	       (y (string-to-number
-		   (substring line (+ (string-match "Y:" line) 3)))))
-	  (vector x x y 0)))))
+(defun scim-frame-top-left-coordinates (&optional frame)
+  "Return the pixel coordinates of FRAME as a cons cell (LEFT . TOP),
+which are relative to top left corner of screen.
 
-(defun scim-save-frame-extents ()
-  (setq scim-frame-extents (if (frame-parameter nil 'parent-id)
-			       ;; no display effect
-			       (scim-get-frame-extents)
-			     ;; with Compiz fusion effects
-			     [0 0 0 0])))
+If FRAME is omitted, use selected-frame.
 
-(defun scim-frame-header-height ()
-  "Return the total of pixel height of menu-bar and tool-bar.
-The value that this function returns is not so accurate."
-  (- (frame-pixel-height)
-     (* (frame-height) (frame-char-height))
-     scim-adjust-window-y-offset))
+Users can also get the frame coordinates by referring the variable
+`scim-saved-frame-coordinates' just after calling this function."
+  ;; Note: This function was imported from pos-tip.el ver. 0.0.3
+  (with-current-buffer (get-buffer-create " *xwininfo*")
+    (let ((case-fold-search nil))
+      (buffer-disable-undo)
+      (erase-buffer)
+      (call-process shell-file-name nil t nil shell-command-switch
+		    (concat "xwininfo -id " (frame-parameter frame 'window-id)))
+      (goto-char (point-min))
+      (search-forward "\n  Absolute")
+      (setq scim-saved-frame-coordinates
+	    (cons (progn (string-to-number (buffer-substring-no-properties
+					    (search-forward "X: ")
+					    (line-end-position))))
+		  (progn (string-to-number (buffer-substring-no-properties
+					    (search-forward "Y: ")
+					    (line-end-position)))))))))
 
-(defun scim-real-frame-header-height ()
-  "Return the total of pixel height of menu-bar and tool-bar.
-The value that this function returns is very exact, but this function
-is quite slower than `scim-frame-header-height'."
-  (if scim-debug (scim-message "get frame header height"))
-  (let* ((window-id (frame-parameter nil 'window-id))
-	 (line (shell-command-to-string
-		(concat "xwininfo -id " window-id
-			" | grep 'Relative upper-left Y:'"))))
-    (string-to-number
-     (substring line (string-match "[0-9]+$" line)))))
+(defun scim-compute-pixel-position
+  (&optional pos window frame-coordinates)
+  "Return the screen pixel position of POS in WINDOW as a cons cell (X . Y).
+Its values show the coordinates of lower left corner of the character.
 
-(defun scim-set-window-y-offset ()
-  (setq scim-adjust-window-y-offset
-	(or (if scim-adjust-window-y-position
-		(let* ((scim-adjust-window-y-offset 0)
-		       (gap (- (scim-frame-header-height)
-			       (scim-real-frame-header-height))))
-		  (if (< gap (frame-char-height)) gap)))
-	    0)))
+Omitting POS and WINDOW means use current position and selected window,
+respectively.
 
-(defun scim-compute-pixel-position ()
-  "Return the screen pxel position of point as (X . Y).
-Its values show the coordinates of lower left corner of the character."
-;  (if scim-debug (scim-message "current-buffer: %S  pos: %d" (current-buffer) (point)))
-  (let* ((posn (posn-at-point))
-	 (x-y (or (posn-x-y posn)
-		 '(0 . 0))))
-;    (if scim-debug (scim-message "(x . y): %s" x-y))
-    (cons (+ (frame-parameter nil 'left)
-	     (aref scim-frame-extents 0)
-	     (car (window-inside-pixel-edges))
-	     (car x-y))
-	  (+ (frame-parameter nil 'top)
-	     (aref scim-frame-extents 2)
-	     (scim-frame-header-height)
-	     (car (cdr (window-pixel-edges)))
-	     (cdr x-y)
-	     (or (and (null header-line-format)
-		      (cdr (posn-object-width-height posn)))
-		 ;; `posn-object-width-height' returns an incorrect value
-		 ;; when the header line is displayed (Emacs bug #4426).
-		 ;; In this case, `frame-header-height' is used substitutively,
-		 ;; but this function doesn't return actual character height.
-		 (frame-char-height))))))
+FRAME-COORDINATES specifies the pixel coordinates of top left corner of the
+target frame as a cons cell like (LEFT . TOP). If omitted, it's automatically
+obtained by `scim-frame-top-left-coordinates', but slightly slower than
+when explicitly specified. Users can get the latest frame coordinates for
+next call by referring the variable `scim-saved-frame-coordinates' just
+after calling this function."
+  ;; Note: This function was imported from pos-tip.el ver. 0.0.3
+  (unless frame-coordinates
+    (scim-frame-top-left-coordinates
+     (window-frame (or window (selected-window)))))
+  (let* ((x-y (or (pos-visible-in-window-p (or pos (window-point window)) window t)
+		  '(0 0)))
+	 (ax (+ (car scim-saved-frame-coordinates)
+		(car (window-inside-pixel-edges))
+		(car x-y)))
+	 (ay (+ (cdr scim-saved-frame-coordinates)
+		(cadr (window-pixel-edges))
+		(cadr x-y)))
+	 ;; `posn-object-width-height' returns an incorrect value
+	 ;; when the header line is displayed (Emacs bug #4426).
+	 ;; In this case, `frame-header-height' is used substitutively,
+	 ;; but this function doesn't return actual character height.
+	 (char-height (or (and header-line-format
+			       (frame-char-height))
+			  (cdr (posn-object-width-height
+				(posn-at-x-y (max (car x-y) 0) (cadr x-y)))))))
+    (cons ax (+ ay char-height))))
 
 ;;; TODO: FIXME: Does anyone know how to get the actual character height
 ;;;              even if the header line is displayed?
@@ -1883,9 +1855,8 @@ i.e. input focus is in this window."
 	  (unless preediting-p
 	    (scim-bridge-receive))) ; Receive
 	(when scim-frame-focus
-	  (scim-save-frame-extents)
-	  (scim-set-window-x-offset)
-	  (scim-set-window-y-offset)))
+	  (scim-frame-top-left-coordinates)
+	  (scim-set-window-x-offset)))
       (unless focus-in
 	;; Set dummy event as a trigger of `post-command-hook'
 	(setq unread-command-events
@@ -2004,7 +1975,7 @@ i.e. input focus is in this window."
       (if scim-preediting-p
 	  (scim-remove-preedit)
 	(if (eq window-system 'x)
-	    (scim-set-window-y-offset))
+	    (scim-frame-top-left-coordinates))
 	(unless scim-surrounding-text-modified
 	  (if scim-debug (scim-message "cleanup base attribute"))
 	  (setq scim-preedit-default-attr nil)))
@@ -2395,9 +2366,9 @@ i.e. input focus is in this window."
 ;  ) ; Debug code
 
 (defun scim-set-cursor-location () ;(id x y)
-  (let* ((pixpos (save-excursion
-		   (goto-char (+ scim-preedit-point scim-preedit-curpos))
-		   (scim-compute-pixel-position)))
+  (let* ((pixpos (scim-compute-pixel-position
+		  (+ scim-preedit-point scim-preedit-curpos) nil
+		  scim-saved-frame-coordinates))
 	 (x (number-to-string
 	     (max (- (car pixpos) scim-adjust-window-x-offset) 1)))
 	 (y (number-to-string (cdr pixpos))))
