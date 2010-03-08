@@ -1207,7 +1207,8 @@ If STRING is empty or nil, the documentation string is left original."
 (defun scim-set-function-doc (function string)
   "Change the documentation string of FUNCTION into STRING.
 If STRING is empty or nil, the documentation string is left original."
-  (if (> (length string) 0)
+  (if (and (fboundp function)
+	   (> (length string) 0))
       (let ((func (symbol-function function)))
 	(if (byte-code-function-p func)
 	    (let ((new-func (append func nil)))
