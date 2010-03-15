@@ -1739,18 +1739,21 @@ Users can also get the frame coordinates by referring the variable
 
 (defun scim-compute-pixel-position
   (&optional pos window frame-coordinates)
-  "Return the screen pixel position of POS in WINDOW as a cons cell (X . Y).
-Its values show the coordinates of lower left corner of the character.
+  "Return the absolute pixel coordinates of POS in WINDOW as a cons cell
+like (X . Y), showing the location of bottom left corner of the character.
 
 Omitting POS and WINDOW means use current position and selected window,
 respectively.
 
-FRAME-COORDINATES specifies the pixel coordinates of top left corner of the
-target frame as a cons cell like (LEFT . TOP). If omitted, it's automatically
-obtained by `scim-frame-top-left-coordinates', but slightly slower than
-when explicitly specified. Users can get the latest frame coordinates for
-next call by referring the variable `scim-saved-frame-coordinates' just
-after calling this function."
+If FRAME-COORDINATES is omitted, automatically obtain the absolute
+coordinates of the top left corner of frame which WINDOW is on. Here,
+`top left corner of frame' represents the origin of `window-pixel-edges'
+and its coordinates are essential for calculating the return value. If
+non-nil, the exact values of frame location must be given as a cons cell
+like (LEFT . TOP). This option makes the calculations slightly faster.
+Users can get the latest values of frame location for using in the next
+call by referring the variable `scim-saved-frame-coordinates' just after
+calling this function."
   ;; Note: This function was imported from pos-tip.el ver. 0.0.3
   (unless frame-coordinates
     (scim-frame-top-left-coordinates
