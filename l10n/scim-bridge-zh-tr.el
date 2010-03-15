@@ -7,7 +7,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-zh-tr-version "0.7.5")
+(defconst scim-bridge-zh-tr-version "0.7.5.50")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -116,6 +116,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Apply translations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (scim-set-group-doc
  'scim
  "智能通用輸入法平台")
@@ -127,6 +128,7 @@
 使用 \\[customize] 或 函數 `scim-mode'.")
 
 ;; Basic settings
+
 (scim-set-group-doc
  'scim-basic
  "操作設置, 例如模式設置和鍵盤設置")
@@ -195,6 +197,7 @@
 意想不到的事件是指, 例如, 用鼠標粘貼字符串.")
 
 ;; Appearance
+
 (scim-set-group-doc
  'scim-appearance
  "外觀, 候選窗口, 等等.")
@@ -298,12 +301,6 @@
           (const :tag "關閉" nil)))
 
 (scim-set-variable-doc
- 'scim-adjust-window-y-position
- "如果這個值為非空 (non-nil), 會使用shell命令 `xwininfo'
-調整候選窗口的垂直位置到到光標的底部.
-否則, 不進行調整, 因此窗口可能會顯示在精確位置的下面一點.")
-
-(scim-set-variable-doc
  'scim-prediction-window-position
  "(隻用於日本輸入法) 這個值以 (位置 . 調整) 的形式給出.
 如果 `位置' 的值為非空 (non-nil), 預想的窗口會在預編輯區域的開頭顯示.
@@ -323,6 +320,7 @@
 這個字符串應該是一個以空格開頭的簡短字符串並描述 `scim-mode'.")
 
 ;; Advanced settings
+
 (scim-set-group-doc
  'scim-expert
  "高級設置")
@@ -382,22 +380,6 @@
  "當預編輯區域存在時這些命令無法使用.")
 
 ;; Functions
-(scim-set-function-doc
- 'scim-set-group-doc
- "改變 GROUP 的文檔字符串為 STRING.
-如果字符串為空 (nil), 文檔字符串保留原來的.")
-
-(scim-set-function-doc
- 'scim-set-variable-doc
- "改變 VARIABLE 的文檔字符串為 STRING.
-如果字符串為空 (nil), 文檔字符串保留原來的.
-如果 CUSTOM-TYPE 為非空 (non-nil), 它設置為 VARIABLE 的 `custom-type' 屬性,
-相當於 `defcustom' 中的 `:type' 關鍵字.")
-
-(scim-set-function-doc
- 'scim-set-face-doc
- "改變 FACE 的文檔字符串為 STRING.
-如果字符串為空 (nil), 文檔字符串保留原來的.")
 
 (scim-set-function-doc
  'scim-define-common-key
@@ -414,42 +396,6 @@
 當 KEY 作為一個數組時, 它並不表示按鍵序列, 而是單一按鍵的多個定義.
 必須調用函數 `scim-update-key-bindings' 或重新啟動 `scim-mode'
 才能使這些設置生效.")
-
-(scim-set-function-doc
- 'scim-reset-imcontext-statuses
- "重新設置每個緩存中保存輸入狀態的變量以糾正不適當的光標顏色.
-這個函數可能會在剛使用 SCIM 圖形設置工具後調用.")
-
-(scim-set-function-doc
- 'scim-get-frame-extents
- "以矢量 [左邊 右邊 頂部 底部] 的形式返回框架邊緣的像素寬度.
-這裡 `頂部' 是指定框架標題欄的高度.")
-
-(scim-set-function-doc
- 'scim-frame-header-height
- "返回菜單欄和工具欄的總像素高度.
-這個函數返回的值並不是那麼精確的.")
-
-(scim-set-function-doc
- 'scim-real-frame-header-height
- "返回菜單欄和工具欄的總的像素高度.
-這個函數返回的值非常精確, 但是這個函數比 `scim-frame-header-height' 要慢很多.")
-
-(scim-set-function-doc
- 'scim-compute-pixel-position
- "以 (X軸 . Y軸) 的形式返回屏幕的像素位置.
-這個值顯示字符左上角的坐標.")
-
-(scim-set-function-doc
- 'scim-get-gnome-font-size
- "返回GNOME環境中應用字體的像素大小.
-設置屏幕分辨率 (點/英寸) 並能夠使用shell命令 `gconftool-2' 是必需的.
-如果不是這樣, 這個函數返回零.")
-
-(scim-set-function-doc
- 'scim-get-active-window-id
- "返回窗口係統前台窗口的 ID.
-也就是輸入聚焦的窗口.")
 
 (scim-set-function-doc
  'scim-enable-isearch

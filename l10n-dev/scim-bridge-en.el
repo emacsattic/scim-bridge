@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-en-version "0.7.5")
+(defconst scim-bridge-en-version "0.7.5.50")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -107,6 +107,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Apply translations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (scim-set-group-doc
  'scim
  "The Smart Common Input Method platform")
@@ -118,6 +119,7 @@ Setting this variable directly does not take effect;
 use either \\[customize] or the function `scim-mode'.")
 
 ;; Basic settings
+
 (scim-set-group-doc
  'scim-basic
  "Settings of operation, such as mode management and keyboard")
@@ -195,6 +197,7 @@ The unexpected event is, for example, that the string is pasted
 with the mouse.")
 
 ;; Appearance
+
 (scim-set-group-doc
  'scim-appearance
  "Faces, candidate window, etc.")
@@ -310,13 +313,6 @@ the cursor is on the bottom of screen."
 	  (const :tag "off" nil)))
 
 (scim-set-variable-doc
- 'scim-adjust-window-y-position
- "If the value is non-nil, the vertical position of candidate window
-is adjusted to the bottom of cursor by using a shell command `xwininfo'.
-Otherwise, the adjustment isn't done and therefore the window might
-be displayed a little below from the exact location.")
-
-(scim-set-variable-doc
  'scim-prediction-window-position
  "(For Japanese IM only) The value should be given as (POS . ADJ).
 If POS is non-nil, the forecast window is displayed under the head
@@ -337,6 +333,7 @@ when scim-mode is active, and not otherwise. This string should be
 a short string which starts with a space and represents scim-mode.")
 
 ;; Advanced settings
+
 (scim-set-group-doc
  'scim-expert
  "Advanced settings")
@@ -405,27 +402,6 @@ value manually before scim-bridge.el is loaded.")
  "These commands are made unusable when the preediting area exists.")
 
 ;; Functions
-(scim-set-function-doc
- 'scim-set-group-doc
- "Change the documentation string of GROUP into STRING.
-If STRING is empty or nil, the documentation string is left original.")
-
-(scim-set-function-doc
- 'scim-set-variable-doc
- "Change the documentation string of VARIABLE into STRING.
-If STRING is empty or nil, the documentation string is left original.
-If CUSTOM-TYPE is non-nil, it is set to the `custom-type' property of
-VARIABLE, which corresponds to the :type keyword in `defcustom'.")
-
-(scim-set-function-doc
- 'scim-set-face-doc
- "Change the documentation string of FACE into STRING.
-If STRING is empty or nil, the documentation string is left original.")
-
-(scim-set-function-doc
- 'scim-set-function-doc
- "Change the documentation string of FUNCTION into STRING.
-If STRING is empty or nil, the documentation string is left original.")
 
 (scim-set-function-doc
  'scim-define-common-key
@@ -444,45 +420,6 @@ KEY is given as an array, it doesn't indicate key sequence, but
 multiple definitions of single keystroke.
  It is necessary to call a function `scim-update-key-bindings' or
 restart scim-mode so that this settings may become effective.")
-
-(scim-set-function-doc
- 'scim-reset-imcontext-statuses
- "Reset entirely the variables which keep the IMContext statuses
-of each buffer in order to correct impropriety of the cursor color.
-This function might be invoked just after using SCIM GUI Setup Utility.")
-
-(scim-set-function-doc
- 'scim-get-frame-extents
- "Return the pixel width of frame edges as vector [left right top bottom].
-Here, `top' also indicates the hight of frame title bar.")
-
-(scim-set-function-doc
- 'scim-frame-header-height
- "Return the total of pixel height of menu-bar and tool-bar.
-The value that this function returns is not so accurate.")
-
-(scim-set-function-doc
- 'scim-real-frame-header-height
- "Return the total of pixel height of menu-bar and tool-bar.
-The value that this function returns is very exact, but this function
-is quite slower than `scim-frame-header-height'.")
-
-(scim-set-function-doc
- 'scim-compute-pixel-position
- "Return the screen pxel position of point as (X . Y).
-Its values show the coordinates of lower left corner of the character.")
-
-(scim-set-function-doc
- 'scim-get-gnome-font-size
- "Return the pixel size of application font in the GNOME desktop
-environment. It is necessary to set the screen resolution (dots per
-inch) and to be able to use a shell command `gconftool-2'. If not,
-this function returns zero.")
-
-(scim-set-function-doc
- 'scim-get-active-window-id
- "Return the number of the window-system window which is foreground,
-i.e. input focus is in this window.")
 
 (scim-set-function-doc
  'scim-enable-isearch

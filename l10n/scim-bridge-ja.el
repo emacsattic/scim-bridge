@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-ja-version "0.7.5")
+(defconst scim-bridge-ja-version "0.7.5.50")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -162,6 +162,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Apply translations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (scim-set-group-doc
  'scim
  "洗練された多言語入力プラットフォーム")
@@ -173,6 +174,7 @@
  \\[customize] あるいは関数 `scim-mode' を用いてください。")
 
 ;; Basic settings
+
 (scim-set-group-doc
  'scim-basic
  "基本的な入力方法の設定（モードの切り替え、キーボードなど）")
@@ -249,6 +251,7 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 を使った文字列の貼り付けなどです。")
 
 ;; Appearance
+
 (scim-set-group-doc
  'scim-appearance
  "外観の設定（フェイス、変換候補ウインドウなど）")
@@ -361,12 +364,6 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 	  (const :tag "off" nil)))
 
 (scim-set-variable-doc
- 'scim-adjust-window-y-position
- "この値が nil 以外ならば、変換候補ウインドウの垂直方向の表示位置が、シェル
-コマンドの `xwininfo' を利用して調節されます。そうでなければ調整は行われず、
-ウインドウが正確な位置よりも少し下にずれるかもしれません。")
-
-(scim-set-variable-doc
  'scim-prediction-window-position
  "(日本語入力時のみ) この変数の値は (POS . ADJ) というコンスセルの形で与
 えられます。もし POS の値が が nil 以外ならば、予測候補ウインドウがプリエディ
@@ -387,6 +384,7 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 scim-modeを表すような短い文字列でなければなりません。")
 
 ;; Advanced settings
+
 (scim-set-group-doc
  'scim-expert
  "高度な設定")
@@ -455,27 +453,6 @@ SCIM がオフの時、あるいは入力フォーカスが他のアプリケー
  "これらのコマンドは、プリエディット領域が存在する時に無効化されます。")
 
 ;; Functions
-(scim-set-function-doc
- 'scim-set-group-doc
- "グループ GROUP の説明文字列を STRING で置換します。
-もし STRING が空文字列または nil であれば、説明文字列は原文のままとなります。")
-
-(scim-set-function-doc
- 'scim-set-variable-doc
- "変数 VARIABLE の説明文字列を STRING で置換します。
-もし STRING が空文字列または nil であれば、説明文字列は原文のままとなります。
-もし CUSTOM-TYPE が nil でなければ、VARIABLE の `custom-type' プロパティに
-設定されます（これは `defcustom' における :type キーワードに対応します）。")
-
-(scim-set-function-doc
- 'scim-set-face-doc
- "フェイス FACE の説明文字列を STRING で置換します。
-もし STRING が空文字列または nil であれば、説明文字列は原文のままとなります。")
-
-(scim-set-function-doc
- 'scim-set-function-doc
- "関数 FUNCTION の説明文字列を STRING で置換します。
-もし STRING が空文字列または nil であれば、説明文字列は原文のままとなります。")
 
 (scim-set-function-doc
  'scim-define-common-key
@@ -494,43 +471,6 @@ KEY が配列として与えられた場合は、キーシーケンスを表す�
 ストロークの複数の定義を表します。
 この設定を有効にするには、関数 `scim-update-key-bindings' を呼び出すか、
 または scim-mode を再起動する必要があります。")
-
-(scim-set-function-doc
- 'scim-reset-imcontext-statuses
- "カーソル色の誤りを修正するために、各バッファのIMコンテクストの状態を保持して
-いる変数を全てリセットします。この関数は、SCIM GUIセットアップユーティリティ
-が使用された直後に呼び出されることがあります。")
-
-(scim-set-function-doc
- 'scim-get-frame-extents
- "フレームの外縁の幅のピクセル数をベクトル [left right top bottom] という形で
-返します。ここで、`top' はフレームのタイトルバーの高さでもあります。")
-
-(scim-set-function-doc
- 'scim-frame-header-height
- "メニューバーとツールバーの高さの合計をピクセル数で返します。この関数の返す
-値はあまり正確ではありません。")
-
-(scim-set-function-doc
- 'scim-real-frame-header-height
- "メニューバーとツールバーの高さの合計をピクセル数で返します。この関数の返す
-値はとても正確ですが、関数 `scim-frame-header-height' と比べてずっと遅いです。")
-
-(scim-set-function-doc
- 'scim-compute-pixel-position
- "ポイント位置のスクリーン上のピクセル座標を (X . Y) という形で返します。
-この値はその文字の左下隅の座標を示しています。")
-
-(scim-set-function-doc
- 'scim-get-gnome-font-size
- "GNOMEデスクトップ環境における、アプリケーションフォントの大きさのピクセル
-数を返します。スクリーンの解像度が設定され、かつシェルコマンド `gconftool-2'
-が使える必要があります。さもなければ、この関数はゼロを返します。")
-
-(scim-set-function-doc
- 'scim-get-active-window-id
- "最前面にある、すなわち入力フォーカスのあるウインドウの、ウインドウシステム
-におけるウインドウ番号を返します。")
 
 (scim-set-function-doc
  'scim-enable-isearch

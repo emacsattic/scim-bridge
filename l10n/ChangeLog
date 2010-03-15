@@ -1,3 +1,20 @@
+2010-03-15  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
+	* Version0.7.6
+	* Deleted translations for deleted variable and functions:
+		scim-adjust-window-y-position
+		scim-get-frame-extents
+		scim-save-frame-extents
+		scim-frame-header-height,
+		scim-real-frame-header-height
+	* Deleted translations for internal functions:
+		scim-set-group-doc
+		scim-set-variable-doc
+		scim-set-face-doc
+		scim-set-function-doc
+		scim-reset-imcontext-statuses
+		scim-compute-pixel-position
+		scim-get-gnome-font-size
+		scim-get-active-window-id
 2010-03-02  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.7.5
 	* Modified docstring:
@@ -7,41 +24,41 @@
 	* Modified description of installation
 2008-12-19  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.7.3
-	* Added docstring:
+	* Added docstrings:
 		scim-simultaneous-pressing-time (*)
 		scim-isearch-cursor-type (*)
 		scim-undo-command-list
-	* Modified docstring:
+	* Modified docstrings:
 		scim-cursor-color (*)
 		scim-cursor-type-for-candidate (*)
 		scim-bridge-timeout
-	* Deleted docstring:
+	* Deleted docstrings:
 		scim-key-release-delay
 		scim-bridge-wait-reply
 	[ (*) indicate that custom-type is added/modified together. ]
 2008-11-28  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.7.2
-	* Added docstring:
+	* Added docstrings:
 		scim-use-in-isearch-window
 		scim-use-minimum-keymap
 		scim-enable-isearch
 		scim-disable-isearch
 		scim-mode (function)
-	* Modified docstring:
+	* Modified docstrings:
 		scim-cursor-color
 		scim-focus-update-interval
 		scim-focus-update-interval-long
-	* Deleted docstring:
+	* Deleted docstrings:
 		scim-bridge-socket-use-script
 		scim-bridge-socket-script-path
 		scim-bridge-socket-script-name
 		scim-bridge-socket-script
 2008-10-14  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.7.1
-	* Added docstring:
+	* Added docstrings:
 		scim-imcontext-temporary-for-minibuffer
 		scim-config-file
-	* Modified docstring:
+	* Modified docstrings:
 		scim-cursor-color
 		scim-reset-imcontext-statuses
 2008-10-08  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
