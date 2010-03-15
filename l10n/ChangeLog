@@ -15,6 +15,7 @@
 		scim-compute-pixel-position
 		scim-get-gnome-font-size
 		scim-get-active-window-id
+	* Modified l10n-HowTo
 2010-03-02  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.7.5
 	* Modified docstring:
