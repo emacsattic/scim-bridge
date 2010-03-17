@@ -1,3 +1,11 @@
+scim-bridge-el (0.7.5.50) karmic; urgency=low
+
+  * Developing version
+  * Moved documents and changelogs to doc directory
+  * Modified to avoid conflicts among changelog names
+
+ -- IRIE Shinsuke <irieshinsuke@yahoo.co.jp>  Wed, 17 Mar 2010 15:49:17 +0900
+
 scim-bridge-el (0.7.5) karmic; urgency=low
 
   * Initial release
