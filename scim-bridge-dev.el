@@ -1749,11 +1749,11 @@ If FRAME-COORDINATES is omitted, automatically obtain the absolute
 coordinates of the top left corner of frame which WINDOW is on. Here,
 `top left corner of frame' represents the origin of `window-pixel-edges'
 and its coordinates are essential for calculating the return value. If
-non-nil, the exact values of frame location must be given as a cons cell
-like (LEFT . TOP). This option makes the calculations slightly faster.
-Users can get the latest values of frame location for using in the next
-call by referring the variable `scim-saved-frame-coordinates' just after
-calling this function."
+non-nil, specifies the frame location as a cons cell like (LEFT . TOP).
+This option makes the calculations slightly faster, but can be used only
+when it's clear that frame is in the specified position. Users can get
+the previous values of frame coordinates by referring the variable
+`scim-saved-frame-coordinates'."
   ;; Note: This function was imported from pos-tip.el ver. 0.0.3
   (unless frame-coordinates
     (scim-frame-top-left-coordinates
