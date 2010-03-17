@@ -2,14 +2,14 @@
 # Copyright (c) 2010 and onwards, S. Irie
 # This program is distributed under the MIT Licence.
 
-PACKAGE="scim-bridge-el"
-VERSION=$(sed -n 's/^(defconst scim-mode-version "\(.*\)")$/\1/p' scim-bridge-dev.el)
-
 EL_DEV="scim-bridge-dev.el"
 EL_MAIN="scim-bridge.el"
 DBGREGEXP="^;*\t* *(if scim-debug ("
 
-FILES=("README" "COPYING" "ChangeLog" "l10n" "l10n-dev" "debian")
+FILES=("README" "COPYING" "doc" "l10n" "debian")
+
+PACKAGE="scim-bridge-el"
+VERSION=$(sed -n 's/^(defconst scim-mode-version "\(.*\)")$/\1/p' $EL_DEV)
 
 
 # Command line options =================
