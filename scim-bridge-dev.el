@@ -1658,12 +1658,14 @@ restart scim-mode so that this settings may become effective."
 			 (car tail)))))))))
 	(ac-fuzzy (with-no-warnings
 		    ;; Fuzzy state of auto-complete-mode
-		    (and (boundp 'ac-fuzzy-enable)
+		    (and (featurep 'auto-complete)
+			 (boundp 'ac-fuzzy-enable)
 			 ac-fuzzy-enable
 			 ac-fuzzy-cursor-color)))
-	(viper (and (boundp 'viper-mode)
-		    viper-mode
-		    (eq (with-no-warnings viper-current-state) 'insert-state)))
+	(viper (with-no-warnings
+		 (and (featurep 'viper)
+		      viper-mode
+		      (eq viper-current-state 'insert-state))))
 	(orig-frame (selected-frame)))
     (if scim-debug (scim-message "set cursor color: %S" color))
     (condition-case err
@@ -2599,8 +2601,8 @@ i.e. input focus is in this window."
 	    (with-no-warnings
 	      (term-send-raw-string scim-committed-string)))
 	   ;; table-mode
-	   ((and (boundp 'table-mode-indicator)
-		 table-mode-indicator)
+	   ((and (featurep 'table)
+		 (with-no-warnings table-mode-indicator))
 	    (scim-*table--cell-insert scim-committed-string))
 	   ;; Normal commit
 	   (scim-undo-by-committed-string
@@ -2670,8 +2672,8 @@ i.e. input focus is in this window."
 	   (retval t))
       (condition-case err
 	  (cond
-	   ((and (boundp 'table-mode-indicator)
-		 table-mode-indicator)
+	   ((and (featurep 'table)
+		 (with-no-warnings table-mode-indicator))
 	    (scim-*table--cell-delete-region beg end))
 	   (t
 	    (delete-region beg end)))
@@ -2697,8 +2699,8 @@ i.e. input focus is in this window."
 	   (retval t))
       (condition-case err
 	  (cond
-	   ((and (boundp 'table-mode-indicator)
-		 table-mode-indicator)
+	   ((and (featurep 'table)
+		 (with-no-warnings table-mode-indicator))
 	    (scim-*table--cell-delete-region beg end)
 	    (scim-*table--cell-insert string))
 	   (t
