@@ -1656,6 +1656,11 @@ restart scim-mode so that this settings may become effective."
 		       (if scim-imcontext-status
 			   (car scim-cursor-color)
 			 (car tail)))))))))
+	(ac-fuzzy (with-no-warnings
+		    ;; Fuzzy state of auto-complete-mode
+		    (and (boundp 'ac-fuzzy-enable)
+			 ac-fuzzy-enable
+			 ac-fuzzy-cursor-color)))
 	(viper (and (boundp 'viper-mode)
 		    viper-mode
 		    (eq (with-no-warnings viper-current-state) 'insert-state)))
@@ -1665,17 +1670,18 @@ restart scim-mode so that this settings may become effective."
 	(while (progn
 		 (unless single-frame
 		   (select-frame (next-frame nil t)))
-		 (if (eq window-system 'x)
-		     (let ((color (or color
-				      (frame-parameter nil 'foreground-color))))
-		       (if (or (eq (window-buffer (frame-selected-window))
-				   scim-current-buffer)
-			       (not scim-mode))
-			   (if viper
-			       (with-no-warnings
-				 (setq viper-insert-state-cursor-color color)
-				 (viper-set-cursor-color-according-to-state))
-			     (set-cursor-color color)))))
+		 (when (or (and (eq window-system 'x)
+				(not ac-fuzzy)
+				(eq (window-buffer (frame-selected-window))
+				    scim-current-buffer))
+			   (not scim-mode))
+		   (unless color
+		     (setq color (frame-parameter nil 'foreground-color)))
+		   (if viper
+		       (with-no-warnings
+			 (setq viper-insert-state-cursor-color color)
+			 (viper-set-cursor-color-according-to-state))
+		     (set-cursor-color color)))
 		 (not (eq (selected-frame) orig-frame))))
       (error
 	(select-frame orig-frame)
