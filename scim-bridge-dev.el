@@ -1768,7 +1768,7 @@ the previous values of frame coordinates by referring the variable
 		(cadr x-y)))
 	 ;; `posn-object-width-height' returns an incorrect value
 	 ;; when the header line is displayed (Emacs bug #4426).
-	 ;; In this case, `frame-header-height' is used substitutively,
+	 ;; In this case, `frame-char-height' is used substitutively,
 	 ;; but this function doesn't return actual character height.
 	 (char-height (or (and header-line-format
 			       (frame-char-height))
