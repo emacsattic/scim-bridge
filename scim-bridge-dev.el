@@ -1047,11 +1047,33 @@ use either \\[customize] or the function `scim-mode'."
 (defvar scim-last-rejected-event nil)
 (defvar scim-last-command nil)
 
-;; Preediting area
+;; IMContexts
+(defvar scim-imcontext-group nil)
+(make-variable-buffer-local 'scim-imcontext-group)
+(put 'scim-imcontext-group 'permanent-local t)
+;; Memo:
+;;  Each element of `scim-imcontext-group-alist' is a list:
+;;  (GROUP IMCONTEXT-ID-ALIST IMCONTEXT-STATUS-ALIST BUFFERS-LIST)
+;;  GROUP is group identifier which is an object comparable by `eq'
+;;  IMCONTEXT-ID-ALIST is an alist of string such as "12"
+;;  IMCONTEXT-STATUS-ALIST is an alist of boolean nil or t
+;;  BUFFERS-LIST is a list of buffers which belong to this group
+;; Example:
+;;  ((#<buffer text.txt>
+;;          ((":1.0" . "1")
+;;           (":0.0" . "20"))
+;;          ((":1.0" . t)
+;;           (":0.0" . nil))
+;;          (#<buffer text.txt>))
+;;   (#<buffer *scratch*>
+;;          ((":1.0" . "2")
+;;           (":0.0" . "19"))
+;;          ((":1.0" . nil)
+;;           (":0.0" . t))
+;;          (#<buffer *scratch*>)))
+(defvar scim-imcontext-group-alist nil)
 (defvar scim-imcontext-id nil)
-(defvar scim-imcontext-id-alist nil)
 (defvar scim-imcontext-status nil)
-(defvar scim-imcontext-status-alist nil)
 (defvar scim-preediting-p nil)
 (defvar scim-preedit-point (make-marker))
 (defvar scim-preedit-update nil)
@@ -1072,7 +1094,7 @@ use either \\[customize] or the function `scim-mode'."
 (make-variable-buffer-local 'scim-cursor-type-saved)
 
 ;; Incremental search
-(defvar scim-isearch-parent-buffer nil)
+(defvar scim-isearch-imcontext-group nil)
 (defvar scim-isearch-minibuffer nil)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1713,21 +1735,12 @@ restart scim-mode so that this settings may become effective."
   "Reset entirely the variables which keep the IMContext statuses
 of each buffer in order to correct impropriety of the cursor color.
 This function might be invoked just after using SCIM GUI Setup Utility."
-  (if scim-mode-local
-      (let ((buffers (buffer-list)))
-	(save-current-buffer
-	  (while buffers
-	    (set-buffer (car buffers))
-	    (when (local-variable-p 'scim-imcontext-status)
-	      (setq scim-imcontext-status nil)
-	      (mapc (lambda (pair)
-		      (setcdr pair nil))
-		    scim-imcontext-status-alist))
-	    (setq buffers (cdr buffers)))))
-    (setq-default scim-imcontext-status nil)
-    (mapc (lambda (pair)
-	    (setcdr pair nil))
-	  (default-value 'scim-imcontext-status-alist)))
+  (mapc (lambda (group)
+	  (mapc (lambda (pair)
+		  (setcdr pair nil))
+		(nth 2 group)))
+	scim-imcontext-group-alist)
+  (setq scim-imcontext-status nil)
   (scim-update-cursor-color))
 
 (defun scim-frame-top-left-coordinates (&optional frame)
@@ -2147,8 +2160,8 @@ i.e. input focus is in this window."
     (let ((buffer (current-buffer))
 	  (display (scim-get-x-display)))
       ;; Switch IMContext between global and local
-      (when (eq (local-variable-p 'scim-imcontext-id)
-		(not scim-mode-local))
+      (unless (eq (eq scim-imcontext-group t)
+		  (not scim-mode-local))
 	(if (eq buffer scim-current-buffer)
 	    (scim-deregister-imcontext)
 	  (let ((scim-current-buffer buffer))
@@ -2170,15 +2183,17 @@ i.e. input focus is in this window."
 		  ;; Cleenup preedit if focus change become timeout
 		  (scim-abort-preedit)))))
 	(setq scim-frame-focus nil
-	      scim-current-buffer buffer)
+	      scim-current-buffer buffer
+	      scim-imcontext-group (or (not scim-mode-local)
+				       (current-buffer)))
 	(add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)
+	(let ((group (assq scim-imcontext-group scim-imcontext-group-alist)))
+	  (setq scim-imcontext-id (cdr (assoc display (cadr group)))
+		scim-imcontext-status (cdr (assoc display (nth 2 group)))))
 	(unless (equal display scim-selected-display)
 	  ;; Display was changed
 	  (scim-check-frame-focus)
-	  (setq scim-selected-display display
-		scim-imcontext-id (cdr (assoc display scim-imcontext-id-alist))
-		scim-imcontext-status (cdr (assoc display
-						  scim-imcontext-status-alist))))
+	  (setq scim-selected-display display))
 	;; Check whether buffer is already registered
 	(unless scim-imcontext-id
 	  (if scim-debug (scim-message "new buffer was detected: %S" buffer))
@@ -2220,12 +2235,10 @@ i.e. input focus is in this window."
   (scim-start-focus-observation))
 
 (defun scim-kill-buffer-function ()
-  (if (local-variable-p 'scim-imcontext-id)
-      (scim-deregister-imcontext)))
+  (scim-deregister-imcontext))
 
 (defun scim-exit-minibuffer-function ()
-  (if (and scim-imcontext-temporary-for-minibuffer
-	   scim-mode-local)
+  (if scim-imcontext-temporary-for-minibuffer
       (scim-deregister-imcontext)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2365,14 +2378,16 @@ i.e. input focus is in this window."
     (if (buffer-live-p scim-current-buffer)
 	(set-buffer scim-current-buffer))
     (while scim-bridge-callback-queue
-      (let* ((buffer (car scim-bridge-callback-queue))
-	     (socket (get-buffer-process buffer))
-	     (scim-selected-display (car (rassoc socket scim-bridge-socket-alist)))
-	     (scim-imcontext-id (cdr (assoc scim-selected-display
-					    scim-imcontext-id-alist)))
-	     (status-pair (assoc scim-selected-display scim-imcontext-status-alist))
+      (let* ((scim-bridge-socket (get-buffer-process
+				  (car scim-bridge-callback-queue)))
+	     (scim-selected-display (car (rassoc scim-bridge-socket
+						 scim-bridge-socket-alist)))
+	     (group (assq scim-imcontext-group scim-imcontext-group-alist))
+	     (scim-imcontext-id (cdr (assoc scim-selected-display (cadr group))))
+	     (status-pair (assoc scim-selected-display (nth 2 group)))
 	     (scim-imcontext-status (cdr status-pair)))
 	(if scim-debug (scim-message "buffer: %s" (current-buffer)))
+	(if scim-debug (scim-message "socket: %s" scim-bridge-socket))
 	(if scim-debug (scim-message "display: %s" scim-selected-display))
 	(if scim-debug (scim-message "imcontext-id: %s" scim-imcontext-id))
 	(scim-bridge-receive)
@@ -2389,16 +2404,6 @@ i.e. input focus is in this window."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Send command to agent
 (defun scim-register-imcontext ()
-  (when (and scim-mode-local
-	     (not (local-variable-p 'scim-imcontext-id)))
-    (make-local-variable 'scim-imcontext-id)
-    (put 'scim-imcontext-id 'permanent-local t)
-    (make-local-variable 'scim-imcontext-id-alist)
-    (put 'scim-imcontext-id-alist 'permanent-local t)
-    (make-local-variable 'scim-imcontext-status)
-    (put 'scim-imcontext-status 'permanent-local t)
-    (make-local-variable 'scim-imcontext-status-alist)
-    (put 'scim-imcontext-status-alist 'permanent-local t))
   (unless scim-imcontext-id
     (setq scim-imcontext-id 'RQ) ; Set symbol to avoid multiple request
     (let ((scim-current-buffer (current-buffer)))
@@ -2409,26 +2414,31 @@ i.e. input focus is in this window."
 	    scim-current-buffer nil))))
 
 (defun scim-deregister-imcontext () ;(id)
-  (mapc (lambda (pair)
-	  (setq scim-imcontext-id (cdr pair))
-	  (when (stringp scim-imcontext-id)
-	    (if scim-frame-focus (scim-change-focus nil))
-	    (scim-bridge-send-receive
-	     (concat "deregister_imcontext " scim-imcontext-id))))
-	scim-imcontext-id-alist)
-	  ;; Even if IMContext is not registered yet, reset variables
-	  ;; immediately here, because `scim-imcontext-deregister' callback
-	  ;; can't receive IMContext ID.
-  (if (local-variable-p 'scim-imcontext-id)
-      (progn
-	(kill-local-variable 'scim-imcontext-id)
-	(kill-local-variable 'scim-imcontext-id-alist)
-	(kill-local-variable 'scim-imcontext-status)
-	(kill-local-variable 'scim-imcontext-status-alist))
-    (setq-default scim-imcontext-id nil)
-    (setq-default scim-imcontext-id-alist nil)
-    (setq-default scim-imcontext-status nil)
-    (setq-default scim-imcontext-status-alist nil))
+  (if (and (stringp scim-imcontext-id)
+	   scim-frame-focus)
+      (scim-change-focus nil))
+  (let ((group (assq scim-imcontext-group scim-imcontext-group-alist)))
+    (when (and group
+	       (null (setcar (nthcdr 3 group)
+			     ;; Remove current buffer from imcontext group
+			     (delq (current-buffer) (nth 3 group)))))
+      (mapc (lambda (pair)
+	      (let* ((scim-selected-display (car pair))
+		     (scim-bridge-socket (cdr (assoc scim-selected-display
+						     scim-bridge-socket-alist)))
+		     (scim-imcontext-id (cdr pair)))
+		(if (stringp scim-imcontext-id)
+		    (scim-bridge-send-receive
+		     (concat "deregister_imcontext " scim-imcontext-id)))))
+	    (cadr group))
+      ;; Even if IMContext is not registered yet, reset variables
+      ;; immediately here, because `scim-imcontext-deregister' callback
+      ;; can't receive IMContext ID.
+      (setq scim-imcontext-id nil
+	    scim-imcontext-status nil
+	    scim-imcontext-group-alist
+	    (assq-delete-all scim-imcontext-group scim-imcontext-group-alist))))
+  (kill-local-variable 'scim-imcontext-group)
   (if (eq scim-current-buffer (current-buffer))
       (setq scim-current-buffer nil)))
 
@@ -2496,7 +2506,10 @@ i.e. input focus is in this window."
       (scim-message "IMContext ID (%s) is mismatched." id)
     (let ((status (equal enabled "TRUE")))
       (setq scim-imcontext-status status)
-      (setcdr (assoc scim-selected-display scim-imcontext-status-alist) status)
+      (setcdr (assoc scim-selected-display
+		     (nth 2 (assq scim-imcontext-group
+				  scim-imcontext-group-alist)))
+	      status)
       (scim-update-cursor-color)
       (scim-set-keymap-parent)
       (when (and scim-use-kana-ro-key
@@ -2511,13 +2524,23 @@ i.e. input focus is in this window."
   ;; Initialize IMContext
   (if scim-debug (scim-message "imcontext registered (id: %s  buf: %S)" id (if scim-mode-local (current-buffer) "global")))
   (setq scim-imcontext-id id
-	scim-imcontext-id-alist (cons (cons scim-selected-display
-					    scim-imcontext-id)
-				      scim-imcontext-id-alist)
-	scim-imcontext-status-alist (cons (cons scim-selected-display nil)
-					  scim-imcontext-status-alist)
 	scim-preedit-prev-string ""
 	scim-preedit-overlays nil)
+  (let ((group (assq scim-imcontext-group scim-imcontext-group-alist)))
+    (if group
+	(setcdr group
+		(list (cons (cons scim-selected-display scim-imcontext-id)
+			    (cadr group))
+		      (cons (cons scim-selected-display nil)
+			    (nth 2 group))
+		      (cons (current-buffer)
+			    (delq (current-buffer) (nth 3 group)))))
+      (setq scim-imcontext-group-alist
+	    (cons (list scim-imcontext-group
+			(list (cons scim-selected-display scim-imcontext-id))
+			(list (cons scim-selected-display nil))
+			(list (current-buffer)))
+		  scim-imcontext-group-alist))))
   (scim-cleanup-preedit)
   (scim-set-preedit-mode))
 
@@ -2905,39 +2928,19 @@ i.e. input focus is in this window."
   (remove-hook 'post-command-hook 'scim-isearch-check-preedit)
   (remove-hook 'minibuffer-exit-hook 'scim-isearch-read-string-post-function t)
   (scim-isearch-start)
-  (when (and scim-mode-local
-	     (local-variable-p 'scim-imcontext-id)
-	     (stringp scim-imcontext-id))
-    (let ((status scim-imcontext-status)
-	  (status-alist scim-imcontext-status-alist))
-      (with-current-buffer scim-isearch-parent-buffer
-	(setq scim-imcontext-status status
-	      scim-imcontext-status-alist status-alist)))
-    (kill-local-variable 'scim-imcontext-id)
-    (kill-local-variable 'scim-imcontext-id-alist)
-    (kill-local-variable 'scim-imcontext-status)
-    (kill-local-variable 'scim-imcontext-status-alist)))
+  (when (stringp scim-imcontext-id)
+    (scim-deregister-imcontext)))
 
 (defun scim-isearch-read-string-pre-function ()
   (if scim-debug (scim-message "isearch: start SCIM input"))
   (remove-hook 'post-command-hook 'scim-isearch-read-string-pre-function)
   (add-hook 'post-command-hook 'scim-isearch-check-preedit t)
   (add-hook 'minibuffer-exit-hook 'scim-isearch-read-string-post-function nil t)
-  (when (and scim-mode-local
-	     (with-current-buffer scim-isearch-parent-buffer
-	       (stringp scim-imcontext-id)))
-    (make-local-variable 'scim-imcontext-id)
-    (make-local-variable 'scim-imcontext-id-alist)
-    (make-local-variable 'scim-imcontext-status)
-    (make-local-variable 'scim-imcontext-status-alist)
-    (setq scim-imcontext-id (with-current-buffer scim-isearch-parent-buffer
-			      scim-imcontext-id)
-	  scim-imcontext-id-alist (with-current-buffer scim-isearch-parent-buffer
-				    scim-imcontext-id-alist)
-	  scim-imcontext-status (with-current-buffer scim-isearch-parent-buffer
-				  scim-imcontext-status)
-	  scim-imcontext-status-alist (with-current-buffer scim-isearch-parent-buffer
-					scim-imcontext-status-alist)))
+  (setq scim-imcontext-group scim-isearch-imcontext-group)
+  (when (stringp scim-imcontext-id)
+    (let ((group (assq scim-imcontext-group scim-imcontext-group-alist)))
+      (setcar (nthcdr 3 group)
+	      (cons (current-buffer) (nth 3 group)))))
   (scim-show-preedit)
   (setq scim-isearch-minibuffer (current-buffer)
 	scim-current-buffer (current-buffer)))
@@ -2948,7 +2951,7 @@ i.e. input focus is in this window."
 	(minibuffer-local-map (with-no-warnings isearch-minibuffer-local-map))
 	(current-input-method nil)
 	(scim-imcontext-temporary-for-minibuffer nil)
-	(scim-isearch-parent-buffer (current-buffer))
+	(scim-isearch-imcontext-group scim-imcontext-group)
 	(scim-isearch-minibuffer nil)
 	scim-current-buffer
 	str junk-hist)
@@ -3055,22 +3058,17 @@ i.e. input focus is in this window."
 ;; Switch minor mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun scim-cleanup-variables ()
-  (let ((buffers (buffer-list)))
-    (save-current-buffer
-      (while buffers
-	(set-buffer (car buffers))
-	(kill-local-variable 'scim-imcontext-id)
-	(kill-local-variable 'scim-imcontext-id-alist)
-	(kill-local-variable 'scim-imcontext-status)
-	(kill-local-variable 'scim-imcontext-status-alist)
-	(kill-local-variable 'scim-mode-map-prev-disabled)
-	(setq buffers (cdr buffers)))))
-  (setq-default scim-imcontext-id nil)
-  (setq-default scim-imcontext-id-alist nil)
-  (setq-default scim-imcontext-status nil)
-  (setq-default scim-imcontext-status-alist nil)
+  (mapc (lambda (buffer)
+	  (with-current-buffer buffer
+	    (kill-local-variable 'scim-imcontext-group)
+	    (kill-local-variable 'scim-mode-map-prev-disabled)))
+	(buffer-list))
+  (setq-default scim-imcontext-group nil)
   (setq-default scim-mode-map-prev-disabled nil)
   (setq scim-current-buffer nil
+	scim-imcontext-group-alist nil
+	scim-imcontext-id nil
+	scim-imcontext-status nil
 	scim-preediting-p nil
 	scim-last-rejected-event nil
 	scim-last-command nil
@@ -3126,11 +3124,10 @@ i.e. input focus is in this window."
 
 (defun scim-mode-quit ()
   (remove-hook 'kill-emacs-hook 'scim-mode-off)
-  (save-current-buffer
-    (mapc (lambda (buffer)
-	    (set-buffer buffer)
-	    (remove-hook 'kill-buffer-hook 'scim-kill-buffer-function t))
-	  (buffer-list)))
+  (mapc (lambda (buffer)
+	  (with-current-buffer buffer
+	    (remove-hook 'kill-buffer-hook 'scim-kill-buffer-function t)))
+	(buffer-list))
   (remove-hook 'after-make-frame-functions 'scim-after-make-frame-function)
   (remove-hook 'post-command-hook 'scim-check-current-buffer)
   (mapc (lambda (hook)
@@ -3162,15 +3159,10 @@ i.e. input focus is in this window."
     (scim-change-focus nil)
     (setq scim-frame-focus nil))
   ;; Deregister IMContext IDs
-  (let ((buffers (buffer-list)))
-    (save-current-buffer
-      (while buffers
-	(let ((scim-current-buffer (car buffers)))
-	  (set-buffer scim-current-buffer)
-	  (when (local-variable-p 'scim-imcontext-id)
+  (mapc (lambda (group)
+	  (let ((scim-imcontext-id (cdar (cadr group))))
 	    (scim-deregister-imcontext)))
-	(setq buffers (cdr buffers)))))
-  (scim-deregister-imcontext)
+	scim-imcontext-group-alist)
   ;; Turn off minor mode
   (scim-mode-quit))
 
