@@ -1880,14 +1880,15 @@ i.e. input focus is in this window."
 	  (scim-mode-quit)
 	  (setq new-focus (not (eq window-id active-win))))))
     (when (eq (eq window-id active-win) new-focus)
-      (if new-focus
-	  (when (and (not scim-frame-focus)
-		     scim-config-last-modtime
-		     (time-less-p
-		      scim-config-last-modtime (scim-config-file-timestamp)))
-	    (if scim-debug (scim-message "SCIM's settings changed"))
-	    (scim-reset-imcontext-statuses))
-	(setq scim-config-last-modtime (scim-config-file-timestamp)))
+      (when (and new-focus
+		 (not scim-frame-focus)
+		 scim-config-last-modtime
+		 (time-less-p scim-config-last-modtime
+			      (scim-config-file-timestamp)))
+	(if scim-debug (scim-message "SCIM's settings changed"))
+	(scim-reset-imcontext-statuses))
+      (setq scim-config-last-modtime (and (not new-focus)
+					  (scim-config-file-timestamp)))
       (when (and (stringp scim-imcontext-id)
 		 (eq (current-buffer) scim-current-buffer))
 	(setq scim-frame-focus new-focus)
