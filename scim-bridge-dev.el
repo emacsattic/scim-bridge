@@ -1954,12 +1954,19 @@ i.e. input focus is in this window."
 		  (let ((undo-in-progress t))
 		    (setq buffer-undo-list (primitive-undo 2 buffer-undo-list)))
 		  ;; Restore modification flag of yasnippet field at cursor position
-		  (mapc (lambda (overlay)
-			  (when (overlay-get overlay 'yas/modified?)
-			    (overlay-put
-			     overlay 'yas/modified?
-			     (overlay-get overlay 'scim-saved-yas/modified?))))
-			(overlays-at pos)))
+		  (if (boundp 'yas/active-field-overlay)
+		      ;; yasnippet version >= 0.6
+		      (when (memq yas/active-field-overlay (overlays-at pos))
+			(setf (yas/field-modified-p
+			       (overlay-get yas/active-field-overlay 'yas/field))
+			      nil))
+		    ;; yasnippet version < 0.6
+		    (mapc (lambda (overlay)
+			    (when (overlay-get overlay 'yas/modified?)
+			      (overlay-put
+			       overlay 'yas/modified?
+			       (overlay-get overlay 'scim-saved-yas/modified?))))
+			  (overlays-at pos))))
 	      ;; Undo disabled or `buffer-undo-list' is empty
 	      (let (buffer-undo-list)
 		(delete-region pos (+ pos (length scim-preedit-prev-string)))))
