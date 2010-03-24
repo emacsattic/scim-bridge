@@ -1308,13 +1308,13 @@ If STRING is empty or nil, the documentation string is left original."
 	  (setq buffer-undo-list (cons (cons beg end) new-list)))))))
 
 ;; Advices for undo commands
-(mapc '(lambda (command)
-	 (eval
-	  `(defadvice ,command
-	     (around ,(intern (concat "scim-inhibit-" (symbol-name command))) ())
-	     (if scim-preediting-p
-		 (error "SCIM: `%s' cannot be used while preediting!" ',command)
-	       ad-do-it))))
+(mapc (lambda (command)
+	(eval
+	 `(defadvice ,command
+	    (around ,(intern (concat "scim-inhibit-" (symbol-name command))) ())
+	    (if scim-preediting-p
+		(error "SCIM: `%s' cannot be used while preediting!" ',command)
+	      ad-do-it))))
       scim-undo-command-list)
 
 (defun scim-activate-advices-undo (enable)
@@ -1323,13 +1323,13 @@ If STRING is empty or nil, the documentation string is left original."
     (ad-disable-regexp "^scim-inhibit-"))
   (ad-activate-regexp "^scim-inhibit-"))
 
-;; Advices for `yasnippet.el'
-(mapc '(lambda (command)
-	 (eval
-	  `(defadvice ,command
-	     (around ,(intern (concat "scim-inhibit-" (symbol-name command))) ())
-	     (unless scim-preediting-p
-	       ad-do-it))))
+;; Advices for yasnippet (version < 0.6)
+(mapc (lambda (command)
+	(eval
+	 `(defadvice ,command
+	    (around ,(intern (concat "scim-inhibit-" (symbol-name command))) ())
+	    (unless scim-preediting-p
+	      ad-do-it))))
       '(yas/field-undo-before-hook
 	yas/check-cleanup-snippet
 	yas/field-undo-after-hook))
