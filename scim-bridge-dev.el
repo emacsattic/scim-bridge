@@ -3144,7 +3144,7 @@ i.e. input focus is in this window."
 			  '(open run))))
 	  ;; Connection failed
 	  (scim-mode-quit)
-	;; Connection successed
+	;; Connection succeeded
 	(setq scim-selected-display (scim-get-x-display)
 	      scim-bridge-socket-alist (list (cons scim-selected-display
 						   scim-bridge-socket)))
@@ -3201,7 +3201,7 @@ i.e. input focus is in this window."
 	scim-bridge-socket-alist)
   (setq-default scim-mode nil)
   (scim-cleanup-variables)
-  (scim-update-cursor-color)
+  (scim-set-cursor-color)
   (scim-update-mode-line))
 
 (defun scim-mode-off ()
