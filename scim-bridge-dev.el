@@ -2191,9 +2191,7 @@ i.e. input focus is in this window."
 		  ;; Cleenup preedit if focus change become timeout
 		  (scim-abort-preedit)))))
 	(setq scim-frame-focus nil
-	      scim-current-buffer buffer
-	      scim-imcontext-group (or (not scim-mode-local)
-				       (current-buffer)))
+	      scim-current-buffer buffer)
 	(add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)
 	(let ((group (assq scim-imcontext-group scim-imcontext-group-alist)))
 	  (setq scim-imcontext-id (cdr (assoc display (cadr group)))
@@ -2245,9 +2243,42 @@ i.e. input focus is in this window."
 (defun scim-kill-buffer-function ()
   (scim-deregister-imcontext))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Minibuffer
 (defun scim-exit-minibuffer-function ()
   (if scim-imcontext-temporary-for-minibuffer
       (scim-deregister-imcontext)))
+
+(defun scim-minibuffer-inherit-imcontext ()
+  (if scim-debug (scim-message "minibuffer: inherit IMContext"))
+  (remove-hook 'post-command-hook 'scim-minibuffer-inherit-imcontext)
+  (setq scim-imcontext-group scim-minibuffer-group)
+  (when (stringp scim-imcontext-id)
+    (let ((group (assq scim-imcontext-group scim-imcontext-group-alist)))
+      (setcar (nthcdr 3 group)
+	      (cons (current-buffer)
+		    (delq (current-buffer) (nth 3 group)))))))
+
+;; Advices for minibuffer reading
+(mapc (lambda (command)
+	(eval
+	 `(defadvice ,command
+	    (around ,(intern (concat "scim-inherit-" (symbol-name command))) ())
+	    (if inherit-input-method
+		(let ((scim-minibuffer-group scim-imcontext-group))
+		  (add-hook 'post-command-hook 'scim-minibuffer-inherit-imcontext)
+		ad-do-it)
+	      ad-do-it))))
+      '(read-from-minibuffer
+	read-string
+	read-no-blanks-input
+	completing-read))
+
+(defun scim-activate-advices-minibuffer (enable)
+  (if enable
+      (ad-enable-regexp "^scim-inherit-")
+    (ad-disable-regexp "^scim-inherit-"))
+  (ad-activate-regexp "^scim-inherit-"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Communication with agent through an UNIX domain socket
@@ -2532,8 +2563,12 @@ i.e. input focus is in this window."
   ;; Initialize IMContext
   (if scim-debug (scim-message "imcontext registered (id: %s  buf: %S)" id (if scim-mode-local (current-buffer) "global")))
   (setq scim-imcontext-id id
+	scim-imcontext-status nil
 	scim-preedit-prev-string ""
 	scim-preedit-overlays nil)
+  (unless scim-imcontext-group
+    (setq scim-imcontext-group (or (not scim-mode-local)
+				   (current-buffer))))
   (let ((group (assq scim-imcontext-group scim-imcontext-group-alist)))
     (if group
 	(setcdr group
@@ -3112,6 +3147,7 @@ i.e. input focus is in this window."
 	(setq scim-frame-focus nil)
 	(setq scim-selected-frame (selected-frame))
 	(scim-activate-advices-undo t)
+	(scim-activate-advices-minibuffer t)
 	(scim-activate-advice-describe-key t)
 	(scim-setup-isearch)
 	;; Initialize key bindings
@@ -3146,6 +3182,7 @@ i.e. input focus is in this window."
 	(delq 'scim-mode-map-alist emulation-mode-map-alists))
   (scim-update-kana-ro-key t)
   (scim-activate-advices-undo nil)
+  (scim-activate-advices-minibuffer nil)
   (scim-activate-advice-describe-key nil)
   (scim-disable-isearch)
   (scim-cancel-focus-update-timer)
