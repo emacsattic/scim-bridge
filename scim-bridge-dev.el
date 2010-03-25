@@ -1854,6 +1854,23 @@ i.e. input focus is in this window."
 	(setq scim-net-active-window-unsupported t)
 	(scim-get-active-window-id)))))
 
+(defun scim-change-x-display ()
+  (let ((display (scim-get-x-display)))
+    (if scim-debug (scim-message "change display from %s to %s" scim-selected-display display))
+    (setq scim-bridge-socket (cdr (assoc display scim-bridge-socket-alist)))
+    (if scim-bridge-socket
+	(setq scim-selected-display display)
+      (scim-bridge-connect)
+      (if (and scim-bridge-socket
+;	       (equal display ":0.0") ; debug code
+	       (memq (process-status scim-bridge-socket)
+		     '(open run)))
+	  (setq scim-bridge-socket-alist (cons (cons display scim-bridge-socket)
+					       scim-bridge-socket-alist)
+		scim-selected-display display)
+	(scim-mode-off)
+	(error "SCIM: Unable to open socket for display %s" display)))))
+
 (defun scim-config-file-timestamp ()
   (nth 5 (file-attributes scim-config-file)))
 
@@ -1864,21 +1881,7 @@ i.e. input focus is in this window."
 			  (frame-parameter nil 'outer-window-id))))
 	 (active-win (or (not x-frame-p)
 			 (scim-get-active-window-id)))
-	 (new-focus (or (not scim-frame-focus) focus-in))
-	 (display (scim-get-x-display)))
-    (unless (equal display scim-selected-display)
-      (if scim-debug (scim-message "change display from %s to %s" scim-selected-display display))
-      (setq scim-bridge-socket (cdr (assoc display scim-bridge-socket-alist)))
-      (unless scim-bridge-socket
-	(scim-bridge-connect)
-	(if (and scim-bridge-socket
-		 (memq (process-status scim-bridge-socket)
-		       '(open run)))
-	    (setq scim-bridge-socket-alist (cons (cons display scim-bridge-socket)
-						 scim-bridge-socket-alist))
-	  (if scim-debug (scim-message "unable to open socket for display %s" display))
-	  (scim-mode-quit)
-	  (setq new-focus (not (eq window-id active-win))))))
+	 (new-focus (or (not scim-frame-focus) focus-in)))
     (when (eq (eq window-id active-win) new-focus)
       (when (and new-focus
 		 (not scim-frame-focus)
@@ -2166,7 +2169,8 @@ i.e. input focus is in this window."
   (setq scim-last-rejected-event nil)
   (with-current-buffer (window-buffer)
     (let ((buffer (current-buffer))
-	  (display (scim-get-x-display)))
+	  (display-unchanged-p (equal (scim-get-x-display)
+				      scim-selected-display)))
       ;; Switch IMContext between global and local
       (unless (eq (eq scim-imcontext-group t)
 		  (not scim-mode-local))
@@ -2178,7 +2182,7 @@ i.e. input focus is in this window."
       ;; or non-X frame is selected or display is changed
       (unless (and (eq buffer scim-current-buffer)
 		   (eq window-system 'x)
-		   (equal display scim-selected-display))
+		   display-unchanged-p)
 	;; Focus out
 	(if scim-debug (scim-message "buffer was changed from %S to %S" scim-current-buffer buffer))
 	(when (buffer-live-p scim-current-buffer)
@@ -2190,16 +2194,16 @@ i.e. input focus is in this window."
 	      (if scim-preediting-p
 		  ;; Cleenup preedit if focus change become timeout
 		  (scim-abort-preedit)))))
+	(unless display-unchanged-p
+	  (scim-change-x-display))
 	(setq scim-frame-focus nil
 	      scim-current-buffer buffer)
 	(add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)
 	(let ((group (assq scim-imcontext-group scim-imcontext-group-alist)))
-	  (setq scim-imcontext-id (cdr (assoc display (cadr group)))
-		scim-imcontext-status (cdr (assoc display (nth 2 group)))))
-	(unless (equal display scim-selected-display)
-	  ;; Display was changed
-	  (scim-check-frame-focus)
-	  (setq scim-selected-display display))
+	  (setq scim-imcontext-id (cdr (assoc scim-selected-display
+					      (cadr group)))
+		scim-imcontext-status (cdr (assoc scim-selected-display
+						  (nth 2 group)))))
 	;; Check whether buffer is already registered
 	(unless scim-imcontext-id
 	  (if scim-debug (scim-message "new buffer was detected: %S" buffer))
@@ -2397,19 +2401,22 @@ i.e. input focus is in this window."
 	  (scim-parse-reply (scim-split-commands repl)))))))
 
 (defun scim-bridge-send-only (command)
-  (with-current-buffer (process-buffer scim-bridge-socket)
-    (let ((inhibit-modification-hooks t))
-      (erase-buffer)))
-  (if scim-debug (scim-message "process: %s  status: %s" scim-bridge-socket (process-status scim-bridge-socket)))
-  (if scim-debug (scim-message "send: %S" command))
   (condition-case err
-      (process-send-string scim-bridge-socket (concat command "\n"))
+      (progn
+	(with-current-buffer (process-buffer scim-bridge-socket)
+	  (let ((inhibit-modification-hooks t))
+	    (erase-buffer)))
+	(if scim-debug (scim-message "process: %s  status: %s" scim-bridge-socket (process-status scim-bridge-socket)))
+	(if scim-debug (scim-message "send: %S" command))
+	(process-send-string scim-bridge-socket (concat command "\n"))
+	t) ; Succeeded
     (error
-     (scim-message "Couldn't send command to agent %S" err))))
+     (scim-message "Couldn't send command to agent %S" err)
+     nil))) ; Failed
 
 (defun scim-bridge-send-receive (command)
-  (scim-bridge-send-only command)
-  (scim-bridge-receive))
+  (and (scim-bridge-send-only command)
+       (scim-bridge-receive)))
 
 (defun scim-bridge-run-callback ()
   (interactive)
