@@ -1736,9 +1736,9 @@ restart scim-mode so that this settings may become effective."
 of each buffer in order to correct impropriety of the cursor color.
 This function might be invoked just after using SCIM GUI Setup Utility."
   (mapc (lambda (group)
-	  (mapc (lambda (pair)
-		  (setcdr pair nil))
-		(nth 2 group)))
+	  (let ((pair (assoc scim-selected-display (nth 2 group))))
+	    (if pair
+		(setcdr pair nil))))
 	scim-imcontext-group-alist)
   (setq scim-imcontext-status nil)
   (scim-update-cursor-color))
