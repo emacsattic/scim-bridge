@@ -2206,12 +2206,14 @@ i.e. input focus is in this window."
 	  (scim-change-x-display))
 	(setq scim-frame-focus nil
 	      scim-current-buffer buffer)
-	(add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)
+	(unless scim-buffer-group
+	  (setq scim-buffer-group (scim-buffer-group-identifier)))
 	(let ((group (assq scim-buffer-group scim-buffer-group-alist)))
 	  (setq scim-imcontext-id (cdr (assoc scim-selected-display
 					      (cadr group)))
 		scim-imcontext-status (cdr (assoc scim-selected-display
 						  (nth 2 group)))))
+	(add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)
 	;; Check whether buffer is already registered
 	(unless scim-imcontext-id
 	  (if scim-debug (scim-message "new buffer was detected: %S" buffer))
@@ -2580,8 +2582,6 @@ i.e. input focus is in this window."
 	scim-imcontext-status nil
 	scim-preedit-prev-string ""
 	scim-preedit-overlays nil)
-  (unless scim-buffer-group
-    (setq scim-buffer-group (scim-buffer-group-identifier)))
   (let ((group (assq scim-buffer-group scim-buffer-group-alist)))
     (if group
 	(setcdr group
