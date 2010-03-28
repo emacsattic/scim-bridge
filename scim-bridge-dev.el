@@ -2164,6 +2164,14 @@ i.e. input focus is in this window."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Manage buffer switching
+(defun scim-buffer-group-identifier ()
+  (or (not scim-mode-local)
+      (current-buffer)))
+
+(defun scim-buffer-group-suitable-p ()
+  (eq (eq scim-buffer-group t)
+      (not scim-mode-local)))
+
 (defun scim-check-current-buffer ()
 ;  (if scim-debug (scim-message "check current buffer"))
   (scim-cancel-focus-update-timer)
@@ -2173,8 +2181,7 @@ i.e. input focus is in this window."
 	  (display-unchanged-p (equal (scim-get-x-display)
 				      scim-selected-display)))
       ;; Switch IMContext between global and local
-      (unless (eq (eq scim-buffer-group t)
-		  (not scim-mode-local))
+      (unless (scim-buffer-group-suitable-p)
 	(if (eq buffer scim-current-buffer)
 	    (scim-deregister-imcontext)
 	  (let ((scim-current-buffer buffer))
@@ -2574,8 +2581,7 @@ i.e. input focus is in this window."
 	scim-preedit-prev-string ""
 	scim-preedit-overlays nil)
   (unless scim-buffer-group
-    (setq scim-buffer-group (or (not scim-mode-local)
-				(current-buffer))))
+    (setq scim-buffer-group (scim-buffer-group-identifier)))
   (let ((group (assq scim-buffer-group scim-buffer-group-alist)))
     (if group
 	(setcdr group
