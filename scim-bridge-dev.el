@@ -2191,7 +2191,7 @@ i.e. input focus is in this window."
       (unless (and (eq buffer scim-current-buffer)
 		   (eq window-system 'x)
 		   display-unchanged-p)
-	;; Focus out
+	;; Focus out from previous buffer
 	(if scim-debug (scim-message "buffer was changed from %S to %S" scim-current-buffer buffer))
 	(when (buffer-live-p scim-current-buffer)
 	  (with-current-buffer scim-current-buffer
@@ -2202,6 +2202,7 @@ i.e. input focus is in this window."
 	      (if scim-preediting-p
 		  ;; Cleenup preedit if focus change become timeout
 		  (scim-abort-preedit)))))
+	;; Setup currently selected buffer
 	(unless display-unchanged-p
 	  (scim-change-x-display))
 	(setq scim-frame-focus nil
