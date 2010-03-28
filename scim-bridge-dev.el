@@ -2468,7 +2468,9 @@ i.e. input focus is in this window."
     (unless (stringp scim-imcontext-id)
       (scim-message "Couldn't register imcontext.")
       (setq scim-imcontext-id nil
-	    scim-current-buffer nil))))
+	    scim-current-buffer nil)
+      ;; To avoid becoming uncontrollable
+      (remove-hook 'post-command-hook 'scim-check-current-buffer))))
 
 (defun scim-deregister-imcontext () ;(id)
   (if (and (stringp scim-imcontext-id)
@@ -2599,7 +2601,8 @@ i.e. input focus is in this window."
 			(list (current-buffer)))
 		  scim-buffer-group-alist))))
   (scim-cleanup-preedit)
-  (scim-set-preedit-mode))
+  (scim-set-preedit-mode)
+  (add-hook 'post-command-hook 'scim-check-current-buffer))
 
 (defun scim-imcontext-deregister ()
   t)
