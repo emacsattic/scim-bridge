@@ -2478,13 +2478,13 @@ i.e. input focus is in this window."
 		    (scim-bridge-send-receive
 		     (concat "deregister_imcontext " scim-imcontext-id)))))
 	    (cadr group))
-      ;; Even if IMContext is not registered yet, reset variables
+      ;; Even if IMContext is not deregistered yet, reset variables
       ;; immediately here, because `scim-imcontext-deregister' callback
       ;; can't receive IMContext ID.
       (setq scim-imcontext-id nil
 	    scim-imcontext-status nil
-	    scim-buffer-group-alist
-	    (assq-delete-all scim-buffer-group scim-buffer-group-alist))))
+	    scim-buffer-group-alist (assq-delete-all scim-buffer-group
+						     scim-buffer-group-alist))))
   (kill-local-variable 'scim-buffer-group)
   (if (eq scim-current-buffer (current-buffer))
       (setq scim-current-buffer nil)))
