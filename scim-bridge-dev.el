@@ -653,12 +653,12 @@ value manually before scim-bridge.el is loaded.")
     ;; Status
     ("imengine_status_changed"		. scim-imengine-status-changed)
     ("imcontext_registered"		. scim-imcontext-registered)
-    ("preedit_mode_changed"		. scim-preedit-mode-changed)
-    ("focus_changed"			. scim-focus-changed)
-    ("cursor_location_changed"		. scim-cursor-location-changed)
+    ("preedit_mode_changed"		. scim-preedit-mode-changed)      ; Ignored
+    ("focus_changed"			. scim-focus-changed)             ; Ignored
+    ("cursor_location_changed"		. scim-cursor-location-changed)   ; Ignored
     ("key_event_handled"		. scim-key-event-handled)
-    ("imcontext_deregister"		. scim-imcontext-deregister)
-    ("imcontext_reseted"		. scim-imcontext-reseted)
+    ("imcontext_deregister"		. scim-imcontext-deregister)      ; Ignored
+    ("imcontext_reseted"		. scim-imcontext-reseted)         ; Ignored
     ;; Request
     ("forward_key_event"		. scim-forward-key-event)
     ("update_preedit"			. scim-update-preedit)
@@ -673,6 +673,13 @@ value manually before scim-bridge.el is loaded.")
     ("replace_surrounding_text"		. scim-replace-surrounding-text)
     ("beep"				. scim-beep)
     ))
+
+(defvar scim-ignored-signal-list
+  '(scim-preedit-mode-changed
+    scim-focus-changed
+    scim-cursor-location-changed
+    scim-imcontext-deregister
+    scim-imcontext-reseted))
 
 (defvar scim-modifier-alist
   `(
@@ -1034,7 +1041,7 @@ use either \\[customize] or the function `scim-mode'."
 ;; Communication & buffer editing
 (defvar scim-bridge-socket nil)
 (defvar scim-bridge-socket-alist nil)
-(defvar scim-bridge-callback-queue nil)
+(defvar scim-callback-queue nil)
 (defvar scim-selected-display nil)
 (defvar scim-last-command-event nil)
 (defvar scim-current-buffer nil)
@@ -1507,7 +1514,7 @@ If STRING is empty or nil, the documentation string is left original."
     (if scim-debug (scim-message "update scim-mode-map"))
     (unless (keymapp scim-mode-map)
       (setq scim-mode-map (make-sparse-keymap)))
-    (define-key scim-mode-map [scim-receive-event] 'scim-bridge-run-callback)
+    (define-key scim-mode-map [scim-receive-event] 'scim-exec-callback)
     (define-key scim-mode-map [scim-dummy-event] 'scim-null-command)
     (scim-set-keymap-parent))
   (when (memq symbol '(nil scim-preedit-function-key-list))
@@ -1911,10 +1918,12 @@ i.e. input focus is in this window."
 	(when scim-frame-focus
 	  (scim-frame-top-left-coordinates)
 	  (scim-set-window-x-offset)))
-      (unless focus-in
+      (unless (or focus-in
+		  (memq 'scim-receive-event unread-command-events))
 	;; Set dummy event as a trigger of `post-command-hook'
 	(setq unread-command-events
-	      (cons 'scim-dummy-event unread-command-events))))))
+	      (cons 'scim-dummy-event
+		    (delq 'scim-dummy-event unread-command-events)))))))
 
 (defun scim-cancel-focus-update-timer ()
   (when scim-focus-update-timer
@@ -2307,7 +2316,8 @@ i.e. input focus is in this window."
 	  (let ((buffer (process-buffer proc)))
 	    (when (buffer-live-p buffer)
 	      (with-current-buffer buffer
-		(remove-hook 'after-change-functions 'scim-bridge-set-receive-event t))
+		(remove-hook 'after-change-functions
+			     'scim-bridge-receive-passively t))
 	      (kill-buffer buffer)))
 	  (delete-process proc)
 	  (if scim-debug (scim-message "process: %s  status: %s" proc (process-status proc)))
@@ -2375,17 +2385,16 @@ i.e. input focus is in this window."
 	  ;; `make-local-hook' is an obsolete function (as of Emacs 21.1)
 ;	  (make-local-hook 'after-change-functions)
 	  (add-hook 'after-change-functions
-		    'scim-bridge-set-receive-event nil t))))))
+		    'scim-bridge-receive-passively nil t))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Communicate with agent
-(defun scim-bridge-receive ()
-  (when (interactive-p)
-    (unless (eq last-command 'scim-handle-event)
-      (setq scim-string-insertion-failed nil))
-    (setq this-command last-command))
-  (let ((repl nil))
-    (with-current-buffer (process-buffer scim-bridge-socket)
+(defun scim-bridge-receive (&optional passive)
+  (let (repl)
+    (save-current-buffer
+      (when (or passive
+		(and (processp scim-bridge-socket)
+		     (set-buffer (process-buffer scim-bridge-socket))))
       (let ((inhibit-modification-hooks t)
 	    (sec (and (floatp scim-bridge-timeout) scim-bridge-timeout))
 	    (msec (and (integerp scim-bridge-timeout) scim-bridge-timeout)))
@@ -2397,19 +2406,13 @@ i.e. input focus is in this window."
 	  (accept-process-output scim-bridge-socket sec msec t))
 	(setq repl (buffer-string))
 	(erase-buffer)
-	(if scim-debug (scim-message "recv:\n%s" repl))
+	(if scim-debug (scim-message "receive:\n%s" repl))
 	(setq unread-command-events
 	      (delq 'scim-receive-event
-		    (delq 'scim-dummy-event unread-command-events)))))
-    (if (string= repl "")
-	(scim-message "Data reception became timeout.")
-      (when (buffer-live-p scim-current-buffer)
-	(with-current-buffer scim-current-buffer
-	  (if scim-debug (scim-message "this-command: %s" this-command))
-	  (if scim-debug (scim-message "last-command: %s" last-command))
-	  (if scim-debug (scim-message "scim-last-command-event: %s" scim-last-command-event))
-	  (if scim-debug (scim-message "before-change-functions: %s" before-change-functions))
-	  (scim-parse-reply (scim-split-commands repl)))))))
+		    (delq 'scim-dummy-event unread-command-events))))
+      (if (string= repl "")
+	  (scim-message "Data reception became timeout.")
+	(scim-parse-reply (scim-split-commands repl)))))))
 
 (defun scim-bridge-send-only (command)
   (condition-case err
@@ -2429,34 +2432,9 @@ i.e. input focus is in this window."
   (and (scim-bridge-send-only command)
        (scim-bridge-receive)))
 
-(defun scim-bridge-run-callback ()
-  (interactive)
-  (save-current-buffer
-    (if (buffer-live-p scim-current-buffer)
-	(set-buffer scim-current-buffer))
-    (while scim-bridge-callback-queue
-      (let* ((scim-bridge-socket (get-buffer-process
-				  (car scim-bridge-callback-queue)))
-	     (scim-selected-display (car (rassoc scim-bridge-socket
-						 scim-bridge-socket-alist)))
-	     (group (assq scim-buffer-group scim-buffer-group-alist))
-	     (scim-imcontext-id (cdr (assoc scim-selected-display (cadr group))))
-	     (status-pair (assoc scim-selected-display (nth 2 group)))
-	     (scim-imcontext-status (cdr status-pair)))
-	(if scim-debug (scim-message "buffer: %s" (current-buffer)))
-	(if scim-debug (scim-message "socket: %s" scim-bridge-socket))
-	(if scim-debug (scim-message "display: %s" scim-selected-display))
-	(if scim-debug (scim-message "imcontext-id: %s" scim-imcontext-id))
-	(scim-bridge-receive)
-	(if (consp status-pair)
-	    (setcdr status-pair scim-imcontext-status))
-	(setq scim-bridge-callback-queue (cdr scim-bridge-callback-queue))))))
-
-(defun scim-bridge-set-receive-event (beg &optional end lng)
+(defun scim-bridge-receive-passively (beg &optional end lng)
   (if scim-debug (scim-message "passively receive"))
-  (add-to-list 'scim-bridge-callback-queue (current-buffer) t 'eq)
-  (setq unread-command-events
-	(cons 'scim-receive-event unread-command-events)))
+  (scim-bridge-receive t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Send command to agent
@@ -2883,18 +2861,80 @@ i.e. input focus is in this window."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Execute commands replied from agent
-(defun scim-parse-reply (cmdlist)
-  (while cmdlist
-    (let* ((args (car cmdlist))
-	   (cmd (cdr (assoc (car args) scim-reply-alist))))
-      (if cmd
-	  (progn
-	    (if scim-debug (scim-message "execute: %s" args))
-	    (apply cmd (cdr args)))
-	(scim-message "Unknown command received from agent: %S" (car args))
-	))
-    (setq cmdlist (cdr cmdlist)))
-  (scim-do-update-preedit))
+(defun scim-exec-callback-1 (sexps)
+  (if scim-debug (scim-message "buffer: %s" (current-buffer)))
+  (if scim-debug (scim-message "socket: %s" scim-bridge-socket))
+  (if scim-debug (scim-message "display: %s" scim-selected-display))
+  (if scim-debug (scim-message "imcontext-id: %s" scim-imcontext-id))
+  (mapc (lambda (sexp)
+	  (if scim-debug (scim-message "execute: %S" sexp))
+	  (eval sexp))
+	sexps))
+
+(defun scim-exec-callback ()
+  (interactive)
+  (when (interactive-p)
+    (unless (eq last-command 'scim-handle-event)
+      (setq scim-string-insertion-failed nil))
+    (setq this-command last-command
+	  unread-command-events
+	  (delq 'scim-receive-event
+		(delq 'scim-dummy-event unread-command-events))))
+  (when (buffer-live-p scim-current-buffer)
+    (with-current-buffer scim-current-buffer
+      (while scim-callback-queue
+	(let* ((queue (car scim-callback-queue))
+	       (scim-bridge-socket (car queue))
+	       (scim-selected-display (car (rassoc scim-bridge-socket
+						   scim-bridge-socket-alist)))
+	       (group (assq scim-buffer-group scim-buffer-group-alist))
+	       (scim-imcontext-id (cdr (assoc scim-selected-display
+					      (cadr group))))
+	       (scim-imcontext-status (cdr (assoc scim-selected-display
+						  (nth 2 group)))))
+	  (scim-exec-callback-1 (cdr queue))
+	  (setq scim-callback-queue (cdr scim-callback-queue))))
+      (let ((group (assq scim-buffer-group scim-buffer-group-alist)))
+	(setq scim-imcontext-id (cdr (assoc scim-selected-display
+					    (cadr group)))
+	      scim-imcontext-status (cdr (assoc scim-selected-display
+						(nth 2 group)))))
+      (scim-do-update-preedit))))
+
+(defun scim-parse-reply (cmdlist &optional passive)
+  (let (sexps)
+    (while cmdlist
+      (let* ((args (car cmdlist))
+	     (callback (cdr (assoc (car args) scim-reply-alist))))
+	(cond
+	 ((memq callback scim-ignored-signal-list)
+	  (if scim-debug (scim-message "ignore: %S" args))
+	  )
+	 (callback
+	  (setq sexps (cons (cons callback (cdr args)) sexps)))
+	 (t
+	  (scim-message "Unknown command received from agent: %S" (car args))
+	  ))
+	(setq cmdlist (cdr cmdlist))))
+    (when sexps
+      (if scim-debug (scim-message "this-command: %s" this-command))
+      (if scim-debug (scim-message "last-command: %s" last-command))
+      (if scim-debug (scim-message "scim-last-command-event: %s" scim-last-command-event))
+      (if scim-debug (scim-message "before-change-functions: %s" before-change-functions))
+      (if passive
+	  (let ((queue1 (list (cons (get-buffer-process (current-buffer))
+				    (nreverse sexps)))))
+	    (if scim-callback-queue
+		(nconc scim-callback-queue queue1)
+	      (setq scim-callback-queue queue1))
+	    (setq unread-command-events
+		  (cons 'scim-receive-event
+			(delq 'scim-receive-event
+			      (delq 'scim-dummy-event unread-command-events)))))
+	(when (buffer-live-p scim-current-buffer)
+	  (with-current-buffer scim-current-buffer
+	    (scim-exec-callback-1 (nreverse sexps))
+	    (scim-do-update-preedit)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Process key events
@@ -3129,6 +3169,7 @@ i.e. input focus is in this window."
 	scim-buffer-group-alist nil
 	scim-imcontext-id nil
 	scim-imcontext-status nil
+	scim-callback-queue nil
 	scim-preediting-p nil
 	scim-last-rejected-event nil
 	scim-last-command nil
@@ -3181,6 +3222,7 @@ i.e. input focus is in this window."
 	(if scim-debug (scim-message "post-command-hook: %s" post-command-hook))
 	(add-hook 'after-make-frame-functions 'scim-after-make-frame-function)
 	(add-hook 'kill-emacs-hook 'scim-mode-off)))
+    (if scim-debug (scim-message "scim-mode ON" post-command-hook))
     (scim-update-mode-line)))
 
 (defun scim-mode-quit ()
@@ -3212,6 +3254,7 @@ i.e. input focus is in this window."
   (setq-default scim-mode nil)
   (scim-cleanup-variables)
   (scim-set-cursor-color)
+  (if scim-debug (scim-message "scim-mode OFF" post-command-hook))
   (scim-update-mode-line))
 
 (defun scim-mode-off ()
