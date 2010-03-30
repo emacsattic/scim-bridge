@@ -1063,11 +1063,11 @@ use either \\[customize] or the function `scim-mode'."
 (put 'scim-buffer-group 'permanent-local t)
 ;; Memo:
 ;;  Each element of `scim-buffer-group-alist' is a list:
-;;  (GROUP IMCONTEXT-ID-ALIST IMCONTEXT-STATUS-ALIST BUFFERS-LIST)
+;;  (GROUP IMCONTEXT-ID-ALIST IMCONTEXT-STATUS-ALIST BUFFER-LIST)
 ;;  GROUP is group identifier which is an object comparable by `eq'
 ;;  IMCONTEXT-ID-ALIST is an alist of string such as "12"
 ;;  IMCONTEXT-STATUS-ALIST is an alist of boolean nil or t
-;;  BUFFERS-LIST is a list of buffers which belong to this group
+;;  BUFFER-LIST is a list of buffers which belong to this group
 ;; Example:
 ;;  ((#<buffer text.txt>
 ;;          ((":1.0" . "1")
