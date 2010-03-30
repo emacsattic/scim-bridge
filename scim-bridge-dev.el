@@ -2285,13 +2285,14 @@ i.e. input focus is in this window."
       (scim-deregister-imcontext)))
 
 (defun scim-minibuffer-inherit-imcontext ()
-  (if scim-debug (scim-message "minibuffer: inherit IMContext"))
   (remove-hook 'post-command-hook 'scim-minibuffer-inherit-imcontext)
-  (setq scim-buffer-group scim-minibuffer-group)
-  (let ((group (assq scim-buffer-group scim-buffer-group-alist)))
-    (setcar (nthcdr 3 group)
-	    (cons (current-buffer)
-		  (delq (current-buffer) (nth 3 group))))))
+  (when (minibufferp)
+    (if scim-debug (scim-message "minibuffer: inherit IMContext"))
+    (setq scim-buffer-group scim-minibuffer-group)
+    (let ((group (assq scim-buffer-group scim-buffer-group-alist)))
+      (setcar (nthcdr 3 group)
+	      (cons (current-buffer)
+		    (delq (current-buffer) (nth 3 group)))))))
 
 ;; Advices for minibuffer reading
 (mapc (lambda (command)
