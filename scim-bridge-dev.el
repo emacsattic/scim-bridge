@@ -216,6 +216,7 @@ is effective only when the option `scim-mode-local' is active (non-nil)."
 (defun scim-customize-isearch (var value)
   (set var value)
   (if (and (fboundp 'scim-setup-isearch)
+	   (boundp 'scim-mode)
 	   scim-mode)
       (scim-setup-isearch)))
 
@@ -230,6 +231,7 @@ Note that this option requires SCIM-Bridge version 0.4.13 or later."
 (defun scim-customize-key (var value)
   (set var value)
   (if (and (fboundp 'scim-update-key-bindings)
+	   (boundp 'scim-mode)
 	   scim-mode)
       (scim-update-key-bindings var)))
 
@@ -424,6 +426,7 @@ GUI Setup Utility."
 (defun scim-customize-cursor-color (var value)
   (set var value)
   (if (and (fboundp 'scim-set-cursor-color)
+	   (boundp 'scim-mode)
 	   scim-mode)
       (scim-set-cursor-color)))
 
@@ -1326,10 +1329,11 @@ If STRING is empty or nil, the documentation string is left original."
       scim-undo-command-list)
 
 (defun scim-activate-advices-undo (enable)
-  (if enable
-      (ad-enable-regexp "^scim-inhibit-")
-    (ad-disable-regexp "^scim-inhibit-"))
-  (ad-activate-regexp "^scim-inhibit-"))
+  (with-no-warnings
+    (if enable
+	(ad-enable-regexp "^scim-inhibit-")
+      (ad-disable-regexp "^scim-inhibit-"))
+    (ad-activate-regexp "^scim-inhibit-")))
 
 ;; Advices for yasnippet (version < 0.6)
 (mapc (lambda (command)
@@ -1982,9 +1986,10 @@ i.e. input focus is in this window."
 		  (if (boundp 'yas/active-field-overlay)
 		      ;; yasnippet version >= 0.6
 		      (when (memq yas/active-field-overlay (overlays-at pos))
-			(setf (yas/field-modified-p
-			       (overlay-get yas/active-field-overlay 'yas/field))
-			      nil))
+			(with-no-warnings
+			  (setf (yas/field-modified-p
+				 (overlay-get yas/active-field-overlay 'yas/field))
+				nil)))
 		    ;; yasnippet version < 0.6
 		    (mapc (lambda (overlay)
 			    (when (overlay-get overlay 'yas/modified?)
