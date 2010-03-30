@@ -1883,14 +1883,25 @@ i.e. input focus is in this window."
   (nth 5 (file-attributes scim-config-file)))
 
 (defun scim-check-frame-focus (&optional focus-in)
-  (let* ((x-frame-p (eq window-system 'x))
-	 (window-id (and x-frame-p
-			 (string-to-number
-			  (frame-parameter nil 'outer-window-id))))
-	 (active-win (or (not x-frame-p)
-			 (scim-get-active-window-id)))
+  (let* (active-win
+	 redirect
+	 (focused-p
+	  (and (eq window-system 'x)
+	       (setq active-win (scim-get-active-window-id))
+	       (or (eq active-win
+		       (string-to-number
+			(frame-parameter nil 'outer-window-id)))
+		   (eq active-win
+		       (and (setq redirect
+				  (car (delq nil
+					     (mapcar (lambda (frame)
+						       (and (frame-focus frame)
+							    frame))
+						     (frame-list)))))
+			    (string-to-number
+			     (frame-parameter redirect 'outer-window-id)))))))
 	 (new-focus (or (not scim-frame-focus) focus-in)))
-    (when (eq (eq window-id active-win) new-focus)
+    (when (eq focused-p new-focus)
       (when (and new-focus
 		 (not scim-frame-focus)
 		 scim-config-last-modtime
