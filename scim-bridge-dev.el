@@ -2885,7 +2885,7 @@ i.e. input focus is in this window."
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Execute commands replied from agent
-(defun scim-exec-callback-1 (sexps)
+(defun scim-exec-callback-1 (sexplist)
   (if scim-debug (scim-message "buffer: %s" (current-buffer)))
   (if scim-debug (scim-message "socket: %s" scim-bridge-socket))
   (if scim-debug (scim-message "display: %s" scim-selected-display))
@@ -2893,7 +2893,7 @@ i.e. input focus is in this window."
   (mapc (lambda (sexp)
 	  (if scim-debug (scim-message "execute: %S" sexp))
 	  (eval sexp))
-	sexps))
+	sexplist))
 
 (defun scim-exec-callback ()
   (interactive)
@@ -2926,7 +2926,7 @@ i.e. input focus is in this window."
       (scim-do-update-preedit))))
 
 (defun scim-parse-reply (cmdlist &optional passive)
-  (let (sexps)
+  (let (rsexplist)
     (while cmdlist
       (let* ((args (car cmdlist))
 	     (callback (cdr (assoc (car args) scim-reply-alist))))
@@ -2935,19 +2935,19 @@ i.e. input focus is in this window."
 	  (if scim-debug (scim-message "ignore: %S" args))
 	  )
 	 (callback
-	  (setq sexps (cons (cons callback (cdr args)) sexps)))
+	  (setq rsexplist (cons (cons callback (cdr args)) rsexplist)))
 	 (t
 	  (scim-message "Unknown command received from agent: %S" (car args))
 	  ))
 	(setq cmdlist (cdr cmdlist))))
-    (when sexps
+    (when rsexplist
       (if scim-debug (scim-message "this-command: %s" this-command))
       (if scim-debug (scim-message "last-command: %s" last-command))
       (if scim-debug (scim-message "scim-last-command-event: %s" scim-last-command-event))
       (if scim-debug (scim-message "before-change-functions: %s" before-change-functions))
       (if passive
 	  (let ((queue1 (list (cons (get-buffer-process (current-buffer))
-				    (nreverse sexps)))))
+				    (nreverse rsexplist)))))
 	    (if scim-callback-queue
 		(nconc scim-callback-queue queue1)
 	      (setq scim-callback-queue queue1))
@@ -2957,7 +2957,7 @@ i.e. input focus is in this window."
 			      (delq 'scim-dummy-event unread-command-events)))))
 	(when (buffer-live-p scim-current-buffer)
 	  (with-current-buffer scim-current-buffer
-	    (scim-exec-callback-1 (nreverse sexps))
+	    (scim-exec-callback-1 (nreverse rsexplist))
 	    (scim-do-update-preedit)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -3021,7 +3021,7 @@ i.e. input focus is in this window."
 		  (default-value 'post-command-hook))
       (if (y-or-n-p "SCIM: `post-command-hook' was reset for some reasons. Try to repair this? ")
 	  (add-hook 'post-command-hook 'scim-check-current-buffer)
-      (scim-mode-off)))))
+	(scim-mode-off)))))
 
 (defun scim-handle-event (&optional arg)
   (interactive "*p")
