@@ -2458,8 +2458,14 @@ i.e. input focus is in this window."
 (defun scim-register-imcontext ()
   (unless scim-imcontext-id
     (setq scim-imcontext-id 'RQ) ; Set symbol to avoid multiple request
-    (let ((scim-current-buffer (current-buffer)))
-      (scim-bridge-send-receive "register_imcontext"))
+    (let ((time-limit (+ (float-time)
+			 (or (and (floatp scim-bridge-timeout)
+				  scim-bridge-timeout)
+			     (/ scim-bridge-timeout 1000.0)))))
+      (scim-bridge-send-receive "register_imcontext")
+      (while (and (not (stringp scim-imcontext-id))
+		  (< (float-time) time-limit))
+	(sit-for 0.1)))
     (unless (stringp scim-imcontext-id)
       (scim-message "Couldn't register imcontext.")
       (setq scim-imcontext-id nil
