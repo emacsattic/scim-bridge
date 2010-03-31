@@ -2199,9 +2199,9 @@ i.e. input focus is in this window."
 
 (defun scim-check-current-buffer ()
 ;  (if scim-debug (scim-message "check current buffer"))
-  (scim-cancel-focus-update-timer)
-  (setq scim-last-rejected-event nil)
-  (with-current-buffer (window-buffer)
+  (catch 'exit
+    (scim-cancel-focus-update-timer)
+    (setq scim-last-rejected-event nil)
     (let ((buffer (current-buffer))
 	  (display-unchanged-p (equal (scim-get-x-display)
 				      scim-selected-display)))
@@ -2243,7 +2243,9 @@ i.e. input focus is in this window."
 	;; Check whether buffer is already registered
 	(unless scim-imcontext-id
 	  (if scim-debug (scim-message "new buffer was detected: %S" buffer))
-	  (scim-register-imcontext))
+	  (condition-case nil
+	      (scim-register-imcontext)
+	    (error (throw 'exit nil))))
 	;; Focus in if window is active
 	(when (stringp scim-imcontext-id)
 	  (scim-check-frame-focus t))
@@ -2277,8 +2279,8 @@ i.e. input focus is in this window."
     ;; Check selected frame
     (unless (eq (selected-frame) scim-selected-frame)
       (setq scim-selected-frame (selected-frame))
-      (scim-update-cursor-color)))
-  (scim-start-focus-observation))
+      (scim-update-cursor-color))
+    (scim-start-focus-observation)))
 
 (defun scim-kill-buffer-function ()
   (scim-deregister-imcontext))
@@ -2345,9 +2347,11 @@ i.e. input focus is in this window."
 (defun scim-bridge-process-sentinel (proc stat)
   (if scim-debug (scim-message "process: %s  status: %s" proc (substring stat 0 -1)))
   (scim-mode-quit)
-  (when (scim-mode-on) ; Try to restart
-    (scim-check-current-buffer)
-    (scim-update-cursor-color)))
+  (if (scim-mode-on) ; Try to restart
+      ;; Succeeded
+      (scim-check-current-buffer)
+    ;; Failed
+    (scim-message "Socket is unexpectedly closed. Turned off scim-mode.")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Connect
@@ -2467,11 +2471,9 @@ i.e. input focus is in this window."
 		  (< (float-time) time-limit))
 	(sit-for 0.1)))
     (unless (stringp scim-imcontext-id)
-      (scim-message "Couldn't register imcontext.")
-      (setq scim-imcontext-id nil
-	    scim-current-buffer nil)
-      ;; To avoid becoming uncontrollable
-      (remove-hook 'post-command-hook 'scim-check-current-buffer))))
+      (scim-mode-quit)
+      (scim-message "Couldn't register imcontext. Turned off scim-mode.")
+      (error))))
 
 (defun scim-deregister-imcontext () ;(id)
   (if (and (stringp scim-imcontext-id)
@@ -2602,8 +2604,7 @@ i.e. input focus is in this window."
 			(list (current-buffer)))
 		  scim-buffer-group-alist))))
   (scim-cleanup-preedit)
-  (scim-set-preedit-mode)
-  (add-hook 'post-command-hook 'scim-check-current-buffer))
+  (scim-set-preedit-mode))
 
 (defun scim-imcontext-deregister ()
   t)
