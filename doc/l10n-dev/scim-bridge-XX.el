@@ -179,8 +179,8 @@
  'scim-undo-by-committed-string
  ;; "If the value is nil, undo is performed bringing some short
  ;;committed strings together or dividing the long committed string
- ;;within the range which does not exceed 20 characters. Otherwise, undo
- ;;is executed every committed string."
+ ;;within the range which does not exceed 20 columns. Otherwise, undo
+ ;;is performed to each committed string."
  "")
 
 (scim-set-variable-doc

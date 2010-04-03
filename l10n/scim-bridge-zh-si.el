@@ -185,6 +185,10 @@
 
 (scim-set-variable-doc
  'scim-undo-by-committed-string
+ ;; "If the value is nil, undo is performed bringing some short
+ ;;committed strings together or dividing the long committed string
+ ;;within the range which does not exceed 20 columns. Otherwise, undo
+ ;;is performed to each committed string."
  "如果这个值为空 (nil),
 撤销执行使一些较短的待发字符串链接在一起
 或者按一定的范围 (不超过20个字符) 划分长的待发字符串.
