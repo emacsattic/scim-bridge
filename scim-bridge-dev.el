@@ -379,8 +379,8 @@ within this time interval are sent to SCIM as a simultaneous keystroke."
 (defcustom scim-undo-by-committed-string nil
   "If the value is nil, undo is performed bringing some short
 committed strings together or dividing the long committed string
-within the range which does not exceed 20 characters. Otherwise, undo
-is executed every committed string."
+within the range which does not exceed 20 columns. Otherwise, undo
+is performed to each committed string."
   :type 'boolean
   :group 'scim-basic)
 
@@ -1289,8 +1289,10 @@ If STRING is empty or nil, the documentation string is left original."
 	 (consecutivep (and consp-prev
 			   (= (cdr prev) (point))
 			   (not (= (preceding-char) ?\n))
-			   (<= (+ (cdr prev) (length str))
-			       (+ (car prev) 20))))) ; max 20 chars
+			   (<= (+ (string-width (buffer-substring-no-properties
+						 (car prev) (point)))
+				  (string-width str))
+			       20)))) ; max 20 columns
     (if scim-debug (scim-show-undo-list "previous undo list"))
     (when (and consp-prev
 	       (integerp (car (cdr prev-list))))
@@ -1307,15 +1309,17 @@ If STRING is empty or nil, the documentation string is left original."
 	  (if scim-debug (scim-show-undo-list "unify consecutive insertion entries"))
 	  (setcar (car buffer-undo-list) (car (car prev-list)))
 	  (setcdr buffer-undo-list (cdr prev-list)))
-      (when (and (> (length str) 20)
+      (when (and (> (string-width str) 20)
 		 (listp buffer-undo-list)) ; Undo enabled?
 	(let ((beg (car (car buffer-undo-list)))
 	      (end (cdr (car buffer-undo-list)))
 	      (new-list (cdr buffer-undo-list)))
 	  (if scim-debug (scim-show-undo-list "divide long insertion entry"))
-	  (while (> (- end beg) 20)
-	    (setq new-list (cons nil (cons (cons beg (+ beg 20)) new-list))
-		  beg (+ beg 20)))
+	  (while (let ((len (length (truncate-string-to-width str 20))))
+		   (setq new-list (cons nil (cons (cons beg (+ beg len)) new-list))
+			 beg (+ beg len)
+			 str (substring-no-properties str len))
+		   (> (string-width str) 20)))
 	  (setq buffer-undo-list (cons (cons beg end) new-list)))))))
 
 ;; Advices for undo commands
