@@ -651,6 +651,13 @@ value manually before scim-bridge.el is loaded.")
   '(undo undo-only redo undo-tree-undo undo-tree-redo)
   "These commands are made unusable when the preediting area exists.")
 
+(defvar scim-inherit-im-functions
+  '(read-from-minibuffer read-string read-no-blanks-input completing-read)
+  "List of symbols specifying functions which inherit input method.
+If the function takes the argument INHERIT-INPUT-METHOD, input method
+is inherited only when it's non-nil. Otherwise, input method is
+unconditionally inherited.")
+
 (defvar scim-reply-alist
   '(
     ;; Status
@@ -1104,7 +1111,7 @@ use either \\[customize] or the function `scim-mode'."
 (make-variable-buffer-local 'scim-cursor-type-saved)
 
 ;; Minibuffer
-(defvar scim-minibuffer-group nil)
+(defvar scim-parent-buffer-group nil)
 (defvar scim-isearch-buffer-group nil)
 (defvar scim-isearch-minibuffer nil)
 
@@ -2245,13 +2252,21 @@ i.e. input focus is in this window."
 	  (scim-change-x-display))
 	(setq scim-frame-focus nil
 	      scim-current-buffer buffer)
-	(unless scim-buffer-group
-	  (setq scim-buffer-group (scim-buffer-group-identifier)))
-	(let ((group (assq scim-buffer-group scim-buffer-group-alist)))
+	(let* ((group-id (or scim-buffer-group
+			     scim-parent-buffer-group
+			     (scim-buffer-group-identifier)))
+	       (group (assq group-id scim-buffer-group-alist)))
 	  (setq scim-imcontext-id (cdr (assoc scim-selected-display
 					      (cadr group)))
 		scim-imcontext-status (cdr (assoc scim-selected-display
-						  (nth 2 group)))))
+						  (nth 2 group))))
+	  (unless scim-buffer-group
+	    (setq scim-buffer-group group-id)
+	    (when scim-parent-buffer-group
+	      ;; Inherit IMContext
+	      (scim-log "inherit IMContext (buffer group: %s)" group-id)
+	      (setcar (nthcdr 3 group)
+		      (cons buffer (delq buffer (nth 3 group)))))))
 	(add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)
 	;; Check whether buffer is already registered
 	(unless scim-imcontext-id
@@ -2264,6 +2279,7 @@ i.e. input focus is in this window."
 	  (scim-check-frame-focus t))
 	(scim-set-keymap-parent)
 	(scim-update-cursor-color)))
+    (setq scim-parent-buffer-group nil)
     ;; Disable keymap if buffer is read-only, explicitly disabled, or vi-mode.
     (if (eq (and (or buffer-read-only
 		     scim-mode-map-disabled
@@ -2298,43 +2314,29 @@ i.e. input focus is in this window."
 (defun scim-kill-buffer-function ()
   (scim-deregister-imcontext))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Minibuffer
 (defun scim-exit-minibuffer-function ()
   (if scim-imcontext-temporary-for-minibuffer
       (scim-deregister-imcontext)))
 
-(defun scim-minibuffer-inherit-imcontext ()
-  (remove-hook 'post-command-hook 'scim-minibuffer-inherit-imcontext)
-  (when (minibufferp)
-    (scim-log "minibuffer: inherit IMContext")
-    (setq scim-buffer-group scim-minibuffer-group)
-    (let ((group (assq scim-buffer-group scim-buffer-group-alist)))
-      (setcar (nthcdr 3 group)
-	      (cons (current-buffer)
-		    (delq (current-buffer) (nth 3 group)))))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; INHERIT-INPUT-METHOD
+(defun scim-defadvice-inherit-imcontext ()
+  (mapc (lambda (command)
+	  (eval
+	   `(defadvice ,command
+	      (before ,(intern (concat "scim-inherit-im-" (symbol-name command))) ())
+	      (if (and (with-no-warnings
+			 (or (not (boundp 'inherit-input-method))
+			     inherit-input-method))
+		       (stringp scim-imcontext-id))
+		  (setq scim-parent-buffer-group scim-buffer-group)))))
+	scim-inherit-im-functions))
 
-;; Advices for minibuffer reading
-(mapc (lambda (command)
-	(eval
-	 `(defadvice ,command
-	    (around ,(intern (concat "scim-inherit-" (symbol-name command))) ())
-	    (if (and inherit-input-method
-		     (stringp scim-imcontext-id))
-		(let ((scim-minibuffer-group scim-buffer-group))
-		  (add-hook 'post-command-hook 'scim-minibuffer-inherit-imcontext)
-		ad-do-it)
-	      ad-do-it))))
-      '(read-from-minibuffer
-	read-string
-	read-no-blanks-input
-	completing-read))
-
-(defun scim-activate-advices-minibuffer (enable)
+(defun scim-activate-advices-inherit-im (enable)
   (if enable
-      (ad-enable-regexp "^scim-inherit-")
-    (ad-disable-regexp "^scim-inherit-"))
-  (ad-activate-regexp "^scim-inherit-"))
+      (ad-enable-regexp "^scim-inherit-im-")
+    (ad-disable-regexp "^scim-inherit-im-"))
+  (ad-activate-regexp "^scim-inherit-im-"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Communication with agent through an UNIX domain socket
@@ -3242,7 +3244,8 @@ i.e. input focus is in this window."
 	(setq scim-frame-focus nil)
 	(setq scim-selected-frame (selected-frame))
 	(scim-activate-advices-undo t)
-	(scim-activate-advices-minibuffer t)
+	(scim-defadvice-inherit-imcontext)
+	(scim-activate-advices-inherit-im t)
 	(scim-activate-advice-describe-key t)
 	(scim-setup-isearch)
 	;; Initialize key bindings
@@ -3278,7 +3281,7 @@ i.e. input focus is in this window."
 	(delq 'scim-mode-map-alist emulation-mode-map-alists))
   (scim-update-kana-ro-key t)
   (scim-activate-advices-undo nil)
-  (scim-activate-advices-minibuffer nil)
+  (scim-activate-advices-inherit-im nil)
   (scim-activate-advice-describe-key nil)
   (scim-disable-isearch)
   (scim-cancel-focus-update-timer)
