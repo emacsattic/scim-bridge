@@ -1990,7 +1990,7 @@ i.e. input focus is in this window."
 		  (if (boundp 'yas/active-field-overlay)
 		      ;; yasnippet version >= 0.6
 		      (when (memq yas/active-field-overlay (overlays-at pos))
-			(with-no-warnings
+			(dont-compile ; To avoid byte-compile error
 			  (setf (yas/field-modified-p
 				 (overlay-get yas/active-field-overlay 'yas/field))
 				nil)))
@@ -2739,12 +2739,12 @@ i.e. input focus is in this window."
   (with-no-warnings
     (table--finish-delayed-tasks)
     (table-recognize-cell 'force)
-    (eval (macroexpand ; Avoid byte-compile warnings for `table-with-cache-buffer'
-	   '(table-with-cache-buffer
-	     (insert-and-inherit string)
-	     (table--untabify (point-min) (point-max))
-	     (table--fill-region (point-min) (point-max))
-	     (setq table-inhibit-auto-fill-paragraph t))))
+    (dont-compile ; To avoid byte-compile error
+      (table-with-cache-buffer
+       (insert-and-inherit string)
+       (table--untabify (point-min) (point-max))
+       (table--fill-region (point-min) (point-max))
+       (setq table-inhibit-auto-fill-paragraph t)))
     (table--finish-delayed-tasks)))
 
 (defun scim-commit-string (id)
