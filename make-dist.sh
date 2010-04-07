@@ -4,7 +4,7 @@
 
 EL_DEV="scim-bridge-dev.el"
 EL_MAIN="scim-bridge.el"
-DBGREGEXP="^;*\t* *(if scim-debug ("
+DBGREGEXP="^;*\t* *(scim-log\b"
 
 FILES=("README" "COPYING" "doc" "l10n" "debian")
 
