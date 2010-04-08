@@ -3067,7 +3067,8 @@ i.e. input focus is in this window."
   (remove-hook 'minibuffer-exit-hook 'scim-isearch-read-string-post-function t)
   (scim-isearch-start)
   (when (stringp scim-imcontext-id)
-    (scim-deregister-imcontext)))
+    (let (scim-frame-focus) ; To avoid focus out
+      (scim-deregister-imcontext))))
 
 (defun scim-isearch-read-string-pre-function ()
   (scim-log "isearch: start SCIM input")
