@@ -2223,6 +2223,8 @@ i.e. input focus is in this window."
     (scim-cancel-focus-update-timer)
     (setq scim-last-rejected-event nil)
     (let ((buffer (current-buffer))
+	  (visited-or-non-x-p (or scim-imcontext-id
+				  (not (eq window-system 'x))))
 	  (display-unchanged-p (equal (scim-get-x-display)
 				      scim-selected-display)))
       ;; Switch IMContext between global and local
@@ -2231,10 +2233,9 @@ i.e. input focus is in this window."
 	    (scim-deregister-imcontext)
 	  (let ((scim-current-buffer buffer))
 	    (scim-deregister-imcontext))))
-      ;; Change focus if buffer is switched to another one
-      ;; or non-X frame is selected or display is changed
+      ;; Change focus if buffer is switched to another one or display is changed
       (unless (and (eq buffer scim-current-buffer)
-		   (eq window-system 'x)
+		   visited-or-non-x-p
 		   display-unchanged-p)
 	;; Focus out from previous buffer
 	(scim-log "buffer was changed from %S to %S" scim-current-buffer buffer)
@@ -2269,7 +2270,7 @@ i.e. input focus is in this window."
 		      (cons buffer (delq buffer (nth 3 group)))))))
 	(add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)
 	;; Check whether buffer is already registered
-	(unless scim-imcontext-id
+	(unless visited-or-non-x-p
 	  (scim-log "new buffer was detected: %S" buffer)
 	  (condition-case nil
 	      (scim-register-imcontext)
