@@ -2601,9 +2601,7 @@ i.e. input focus is in this window."
   ;; Initialize IMContext
   (scim-log "imcontext registered (id: %s  buf: %S)" id (if scim-mode-local (current-buffer) "global"))
   (setq scim-imcontext-id id
-	scim-imcontext-status nil
-	scim-preedit-prev-string ""
-	scim-preedit-overlays nil)
+	scim-imcontext-status nil)
   (let ((group (assq scim-buffer-group scim-buffer-group-alist)))
     (if group
 	(setcdr group
