@@ -2267,8 +2267,8 @@ i.e. input focus is in this window."
 	      ;; Inherit IMContext
 	      (scim-log "inherit IMContext (buffer group: %s)" group-id)
 	      (setcar (nthcdr 3 group)
-		      (cons buffer (delq buffer (nth 3 group)))))))
-	(add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)
+		      (cons buffer (delq buffer (nth 3 group)))))
+	    (add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)))
 	;; Check whether buffer is already registered
 	(unless visited-or-non-x-p
 	  (scim-log "new buffer was detected: %S" buffer)
