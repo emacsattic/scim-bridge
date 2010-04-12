@@ -627,8 +627,8 @@ scim-mode unusable in multi-display environment.
 If you set this variable, the value must be a string such as \":0.0\".")
 
 (define-obsolete-variable-alias
- 'scim-bridge-x-display-name 'scim-bridge-x-display-substitute
- "Version 0.7.5")
+  'scim-bridge-x-display-name 'scim-bridge-x-display-substitute
+  "Version 0.7.5")
 
 (defvar scim-config-file "~/.scim/config"
   "The name of SCIM's configuration file, which is used to detect
