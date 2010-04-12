@@ -2441,24 +2441,24 @@ i.e. input focus is in this window."
       (when (or passive
 		(and (processp scim-bridge-socket)
 		     (set-buffer (process-buffer scim-bridge-socket))))
-      (let ((inhibit-modification-hooks t)
-	    (sec (and (floatp scim-bridge-timeout) scim-bridge-timeout))
-	    (msec (and (integerp scim-bridge-timeout) scim-bridge-timeout)))
-	(when (= (point-max) 1)
-	  (accept-process-output scim-bridge-socket sec msec t))
-	(when (and (> (point-max) 1)
-		   (/= (char-before (point-max)) ?\n))
-	  (scim-log "retry data reception")
-	  (accept-process-output scim-bridge-socket sec msec t))
-	(setq repl (buffer-string))
-	(erase-buffer)
-	(scim-log "receive:\n%s" repl)
-	(setq unread-command-events
-	      (delq 'scim-receive-event
-		    (delq 'scim-dummy-event unread-command-events))))
-      (if (string= repl "")
-	  (scim-message "Data reception became timeout.")
-	(scim-parse-reply (scim-split-commands repl)))))))
+	(let ((inhibit-modification-hooks t)
+	      (sec (and (floatp scim-bridge-timeout) scim-bridge-timeout))
+	      (msec (and (integerp scim-bridge-timeout) scim-bridge-timeout)))
+	  (when (= (point-max) 1)
+	    (accept-process-output scim-bridge-socket sec msec t))
+	  (when (and (> (point-max) 1)
+		     (/= (char-before (point-max)) ?\n))
+	    (scim-log "retry data reception")
+	    (accept-process-output scim-bridge-socket sec msec t))
+	  (setq repl (buffer-string))
+	  (erase-buffer)
+	  (scim-log "receive:\n%s" repl)
+	  (setq unread-command-events
+		(delq 'scim-receive-event
+		      (delq 'scim-dummy-event unread-command-events))))
+	(if (string= repl "")
+	    (scim-message "Data reception became timeout.")
+	  (scim-parse-reply (scim-split-commands repl)))))))
 
 (defun scim-bridge-send-only (command)
   (condition-case err
