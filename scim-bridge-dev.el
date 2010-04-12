@@ -58,7 +58,7 @@
 ;;   ;; Turn on scim-mode automatically after loading .emacs
 ;;   (add-hook 'after-init-hook 'scim-mode-on)
 ;;   ;; Use C-SPC for Set Mark command
-;;   (scim-define-common-key ?\C-\  nil)
+;;   (scim-define-common-key ?\C-\s nil)
 ;;   ;; Use C-/ for Undo command
 ;;   (scim-define-common-key ?\C-/ nil)
 ;;   ;; Change cursor color depending on SCIM status
@@ -95,7 +95,7 @@
 ;;         * Add option about cursor shape on isearch-mode
 ;;         * Change specification of `scim-cursor-type-for-candidate'
 ;;         * Bug fixes
-;;         * version 0.7.3
+;;         * Version 0.7.3
 ;;
 ;; 2008-12-06  S. Irie
 ;;         * Add support for incremental search mode
