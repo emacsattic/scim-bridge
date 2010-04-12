@@ -648,9 +648,13 @@ value manually before scim-bridge.el is loaded.")
   "List of symbols specifying major mode hooks that scim-mode-map is
 deactivated when invoking these hooks.")
 
-(defvar scim-undo-command-list
+(defvar scim-preedit-incompatible-commands
   '(undo undo-only redo undo-tree-undo undo-tree-redo)
   "List of symbols specifying commands which are disabled when preediting.")
+
+(define-obsolete-variable-alias
+  'scim-undo-command-list 'scim-preedit-incompatible-commands
+  "Version 0.8.0")
 
 (defvar scim-inherit-im-functions
   '(read-from-minibuffer read-string read-no-blanks-input completing-read)
@@ -1347,7 +1351,7 @@ If STRING is empty or nil, the documentation string is left original."
 	    (if scim-preediting-p
 		(error "SCIM: `%s' cannot be used while preediting!" ',command)
 	      ad-do-it))))
-      scim-undo-command-list)
+      scim-preedit-incompatible-commands)
 
 (defun scim-activate-advices-undo (enable)
   (with-no-warnings
