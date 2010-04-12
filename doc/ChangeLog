@@ -1,3 +1,16 @@
+	* Version0.8.0
+	* Added files for building deb package
+	* Added support for multi-display environment
+	* Added support for INHERIT-INPUT-METHOD arg of read-from-minibuffer etc.
+	* Added support for input focus redirection
+	* Changed maximum length of undo to 20 columns rather than 20 characters
+	* Modified not to override descriptions of many keybindings
+	* Modified not to override cursor color of auto-complete's fuzzy completion
+	* Modified so that scim-mode is safely turned off when errors occur
+	* Modified yasnippet support to work correctly for version 0.6
+	* Fixed bug: query-replace often aborts just after starting
+	* Fixed bug: Keymap is incorrectly disabled after using GUI setup utility
+	* Reimplemented functions for calculating pixel coordinates of point
 2010-03-02  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.7.5
 	* Added support for daemon mode of Emacs 23
