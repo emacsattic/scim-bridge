@@ -1,7 +1,15 @@
-2010-03-15  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
-	* Version0.7.6
-	* Deleted translations for deleted variable and functions:
+2010-04-12  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
+	* Version0.8.0
+	* Added docstrings
+		scim-bridge-x-display-substitute
+		scim-preedit-incompatible-commands
+		scim-inherit-im-functions
+	* Modified docstrings
+		scim-undo-by-committed-string
+		scim-incompatible-mode-hooks
+	* Deleted variables and functions
 		scim-adjust-window-y-position
+		scim-undo-command-list
 		scim-get-frame-extents
 		scim-save-frame-extents
 		scim-frame-header-height,

@@ -398,6 +398,15 @@
  "")
 
 (scim-set-variable-doc
+ 'scim-bridge-x-display-substitute
+ ;; "Don't set this variable unless you want to explicitly specify the
+ ;;X display number and screen number. Setting this variable makes
+ ;;scim-mode unusable in multi-display environment.
+ ;;
+ ;;If you set this variable, the value must be a string such as \":0.0\"."
+ "")
+
+(scim-set-variable-doc
  'scim-config-file
  ;; "The name of SCIM's configuration file, which is used to detect
  ;;the change of SCIM settings."
@@ -417,12 +426,21 @@
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks
- ;; "When these hooks run, scim-mode-map become inactive."
+ ;; "List of symbols specifying major mode hooks that scim-mode-map is
+ ;;deactivated when invoking these hooks."
  "")
 
 (scim-set-variable-doc
- 'scim-undo-command-list
- ;; "These commands are made unusable when the preediting area exists."
+ 'scim-preedit-incompatible-commands
+ ;; "List of symbols specifying commands which are disabled when preediting."
+ "")
+
+(scim-set-variable-doc
+ 'scim-inherit-im-functions
+ ;; "List of symbols specifying functions which inherit input method.
+ ;;If the function takes the argument INHERIT-INPUT-METHOD, input method
+ ;;is inherited only when it's non-nil. Otherwise, input method is
+ ;;unconditionally inherited."
  "")
 
 ;; Functions

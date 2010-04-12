@@ -430,6 +430,14 @@ SCIM がオフの時、あるいは入力フォーカスが他のアプリケー
 ならば秒数を表し、整数ならばミリ秒を表します。")
 
 (scim-set-variable-doc
+ 'scim-bridge-x-display-substitute
+ "Xのディスプレイ番号とスクリーン番号を明示的に指定したいのでなければ、
+この変数をセットしないでください。この変数を設定すると、scim-mode は
+マルチディスプレイ環境で使用できなくなります。
+
+この変数の設定値は、 \":0.0\" のような文字列でなければなりません。")
+
+(scim-set-variable-doc
  'scim-config-file
  "SCIM の設定ファイル名です。これは SCIM の設定が変更されたことを検知する
 目的で使用されます。")
@@ -446,11 +454,19 @@ SCIM がオフの時、あるいは入力フォーカスが他のアプリケー
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks
- "これらのフックが実行される時には、scim-mode-map が無効化されます。")
+ "メジャーモードフックを指定するシンボルのリストです。これらのフックが
+実行される時には scim-mode のキーマップが無効化されます。")
 
 (scim-set-variable-doc
- 'scim-undo-command-list
- "これらのコマンドは、プリエディット領域が存在する時に無効化されます。")
+ 'scim-preedit-incompatible-commands
+ "プリエディット中に無効化されるコマンドを指定するシンボルのリストです。")
+
+(scim-set-variable-doc
+ 'scim-inherit-im-functions
+ "インプットメソッドを引き継ぐ関数を指定するシンボルのリストです。
+関数が引数 INHERIT-INPUT-METHOD を取る場合、インプットメソッドはこの
+引数が nil でない場合にのみ引き継がれます。そうでなければ、インプット
+メソッドは無条件で引き継がれます。")
 
 ;; Functions
 

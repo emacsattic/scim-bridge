@@ -363,6 +363,15 @@
 浮點數形式用於表示秒, 整數形式用於表示毫秒.")
 
 (scim-set-variable-doc
+ 'scim-bridge-x-display-substitute
+ ;; "Don't set this variable unless you want to explicitly specify the
+ ;;X display number and screen number. Setting this variable makes
+ ;;scim-mode unusable in multi-display environment.
+ ;;
+ ;;If you set this variable, the value must be a string such as \":0.0\"."
+ "")
+
+(scim-set-variable-doc
  'scim-config-file
  "SCIM 配置文件的名稱, 用於探測 SCIM 設置的改變.")
 
@@ -377,11 +386,22 @@
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks
+ ;; "List of symbols specifying major mode hooks that scim-mode-map is
+ ;;deactivated when invoking these hooks."
  "當這個鉤子運行, `scim-mode-map' 變為無效.")
 
 (scim-set-variable-doc
- 'scim-undo-command-list
- "當預編輯區域存在時這些命令無法使用.")
+ 'scim-preedit-incompatible-commands
+ ;; "List of symbols specifying commands which are disabled when preediting."
+ "")
+
+(scim-set-variable-doc
+ 'scim-inherit-im-functions
+ ;; "List of symbols specifying functions which inherit input method.
+ ;;If the function takes the argument INHERIT-INPUT-METHOD, input method
+ ;;is inherited only when it's non-nil. Otherwise, input method is
+ ;;unconditionally inherited."
+ "")
 
 ;; Functions
 
