@@ -61,7 +61,7 @@
 ;;   ;; .emacs 読込み後、 scim-mode を自動的に ON にする
 ;;   (add-hook 'after-init-hook 'scim-mode-on)
 ;;   ;; C-SPC は Set Mark に使う
-;;   (scim-define-common-key ?\C-\  nil)
+;;   (scim-define-common-key ?\C-\s nil)
 ;;   ;; C-/ は Undo に使う
 ;;   (scim-define-common-key ?\C-/ nil)
 ;;   ;; SCIMの状態によってカーソル色を変化させる
@@ -511,7 +511,7 @@ KEY が配列として与えられた場合は、キーシーケンスを表す�
 いるキーイベントを設定してください。関数 `scim-anthy-reconvert-region'
 で使用されます。")
 
-(defvar scim-toggle-input-method-event ?\C-\ 
+(defvar scim-toggle-input-method-event ?\C-\s
   "この変数には、SCIM のキーバインド設定で「SCIM 開始」に割り当てられて
 いるキーイベントを設定してください。関数 `scim-transfer-romaji-into-preedit'
 で使用されます。")
