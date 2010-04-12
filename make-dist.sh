@@ -17,9 +17,10 @@ VERSION=$(sed -n 's/^(defconst scim-mode-version "\(.*\)")$/\1/p' $EL_DEV)
 DCH="no"
 DEBUILD="no"
 BLDTYPE="deb"
+NATIVE="yes"
 BLDFLAGS=""
 
-while getopts :hcbSpu OPTION
+while getopts :hcbSpnu OPTION
 do
     case $OPTION in
 	h)
@@ -28,6 +29,7 @@ do
 	    echo "  -b  build deb package"
 	    echo "  -S  build source package"
 	    echo "  -p  build deb package using pbuilder"
+	    echo "  -n  build deb package as a non-native one"
 	    echo "  -u  add -us -uc options to debuild"
 	    echo "  -h  display this help and exit"
 	    exit
@@ -56,8 +58,10 @@ do
 	    DEBUILD="yes"
 	    BLDTYPE="pbuild"
 	    ;;
+	n)
+	    NATIVE="no"
+	    ;;
 	u)
-
 	    BLDFLAGS="${BLDFLAGS} -us -uc"
 	    ;;
 	?)
@@ -121,7 +125,9 @@ if [ ! "$DEBUILD" == "yes" ]; then
     exit 0
 fi
 
-cp -pv $ARCHFILE $ORIGARCH
+if [ "$NATIVE" == "no" ]; then
+    cp -pv $ARCHFILE $ORIGARCH
+fi
 
 cd $ARCHDIR
 
