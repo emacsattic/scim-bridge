@@ -1,4 +1,4 @@
-;;; scim-bridge-ja.el
+;;; scim-bridge-ja.el  -*- coding: utf-8 -*-
 
 ;; Copyright (C) 2008, 2009, 2010 S. Irie
 

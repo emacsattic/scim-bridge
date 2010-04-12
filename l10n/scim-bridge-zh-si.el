@@ -1,4 +1,4 @@
-;;; scim-bridge-zh-si.el
+;;; scim-bridge-zh-si.el  -*- coding: utf-8 -*-
 
 ;; Copyright (C) 2008, 2009, 2010 S. Irie
 ;; Copyright (C) 2008, 2009 Andy Stewart

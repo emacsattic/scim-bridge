@@ -1,4 +1,4 @@
-;;; scim-bridge-XX.el
+;;; scim-bridge-XX.el  -*- coding: utf-8 -*-
 
 ;; Copyright (C) 2008, 2009, 2010 S. Irie
 ;; Copyright (C) YEAR TRANSLATOR
