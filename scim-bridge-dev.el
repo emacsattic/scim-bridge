@@ -1,4 +1,6 @@
-;;; scim-bridge.el
+;;; -*- Mode: Emacs-Lisp ; Coding: utf-8 -*-
+
+;;; scim-bridge.el -- SCIM-Bridge client for GNU Emacs
 
 ;; Copyright (C) 2008, 2009, 2010 S. Irie
 
