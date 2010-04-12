@@ -1,8 +1,8 @@
 scim-bridge.el README
 
-
+----------------------------------------------------------------------
 0. Introduction
-
+----------------------------------------------------------------------
 
 scim-bridge.el is a SCIM-Bridge client for Emacs. This program allows
 users on-the-spot style input with SCIM. The input statuses are
@@ -10,24 +10,24 @@ individually kept for each buffer, and prefix-keys such as C-x and C-c
 can be used even if SCIM is active. So you can input various languages
 fast and comfortably by using it.
 
-This program is *not* a part of GNU Emacs.
+This program is *not* a part of SCIM-Bridge.
 
-
+----------------------------------------------------------------------
 1. License
-
+----------------------------------------------------------------------
 
 GNU General Public License version 2
 
-
+----------------------------------------------------------------------
 2. Requirement
-
+----------------------------------------------------------------------
 
 emacs22 | emacs23 | emacs-snapshot
 scim-bridge-agent (>=0.4.13)
 
-
+----------------------------------------------------------------------
 3. Installation
-
+----------------------------------------------------------------------
 
 Save scim-bridge.el in a directory listed in load-path, and add the
 following to ~/.emacs:
@@ -54,18 +54,9 @@ Chinese (traditional):
  (require 'scim-bridge-zh-tr)
  (add-hook 'after-init-hook 'scim-mode-on)
 
-
-4. Known problem
-
-
-This program can't correctly work in multi-display environment yet.
-We assume there are two displays :0.0 and :1.0, for example. Even if
-Emacs is running in the display :1.0, the selection window and SCIM
-panel might appear in another display :0.0.
-
-
-5. Web sites
-
+----------------------------------------------------------------------
+4. Web sites
+----------------------------------------------------------------------
 
 Home page (in Japanese):
 
@@ -83,8 +74,15 @@ Bug tracker:
 
  https://bugs.launchpad.net/scim-bridge.el
 
-
-6. Author
-
+----------------------------------------------------------------------
+5. Author
+----------------------------------------------------------------------
 
 IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
+
+----------------------------------------------------------------------
+6. Translators
+----------------------------------------------------------------------
+
+IRIE Shinsuke <irieshinsuke@yahoo.co.jp> (Japanese)
+Andy Stewart <lazycat.manatee@gmail.com> (Chinese)
