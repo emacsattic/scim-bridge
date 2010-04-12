@@ -621,7 +621,8 @@ the milliseconds."
 	  scim-bridge-host-name))
 (defvar scim-bridge-x-display-substitute nil
   "Don't set this variable unless you want to explicitly specify the
-X display number and screen number.
+X display number and screen number. Setting this variable makes
+scim-mode unusable in multi-display environment.
 
 If you set this variable, the value must be a string such as \":0.0\".")
 
