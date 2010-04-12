@@ -216,8 +216,7 @@ is effective only when the option `scim-mode-local' is active (non-nil)."
 (defun scim-customize-isearch (var value)
   (set var value)
   (if (and (fboundp 'scim-setup-isearch)
-	   (boundp 'scim-mode)
-	   scim-mode)
+	   (bound-and-true-p scim-mode))
       (scim-setup-isearch)))
 
 (defcustom scim-use-in-isearch-window t
@@ -231,8 +230,7 @@ Note that this option requires SCIM-Bridge version 0.4.13 or later."
 (defun scim-customize-key (var value)
   (set var value)
   (if (and (fboundp 'scim-update-key-bindings)
-	   (boundp 'scim-mode)
-	   scim-mode)
+	   (bound-and-true-p scim-mode))
       (scim-update-key-bindings var)))
 
 (defcustom scim-use-minimum-keymap t
@@ -426,8 +424,7 @@ GUI Setup Utility."
 (defun scim-customize-cursor-color (var value)
   (set var value)
   (if (and (fboundp 'scim-set-cursor-color)
-	   (boundp 'scim-mode)
-	   scim-mode)
+	   (bound-and-true-p scim-mode))
       (scim-set-cursor-color)))
 
 (defcustom scim-cursor-color
@@ -1717,8 +1714,7 @@ restart scim-mode so that this settings may become effective."
 	(ac-fuzzy (with-no-warnings
 		    ;; Fuzzy state of auto-complete-mode
 		    (and (featurep 'auto-complete)
-			 (boundp 'ac-fuzzy-enable)
-			 ac-fuzzy-enable
+			 (bound-and-true-p ac-fuzzy-enable)
 			 ac-fuzzy-cursor-color)))
 	(viper (with-no-warnings
 		 (and (featurep 'viper)
