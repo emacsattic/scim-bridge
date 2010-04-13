@@ -645,7 +645,7 @@ value manually before scim-bridge.el is loaded.")
 
 (defvar scim-incompatible-mode-hooks
   '(ediff-mode-hook ebrowse-tree-mode-hook w3m-mode-hook)
-  "List of symbols specifying major mode hooks that scim-mode-map is
+  "List of symbols specifying major mode hooks that `scim-mode-map' is
 deactivated when invoking these hooks.")
 
 (defvar scim-preedit-incompatible-commands

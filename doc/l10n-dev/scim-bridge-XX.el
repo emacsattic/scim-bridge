@@ -426,7 +426,7 @@
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks
- ;; "List of symbols specifying major mode hooks that scim-mode-map is
+ ;; "List of symbols specifying major mode hooks that `scim-mode-map' is
  ;;deactivated when invoking these hooks."
  "")
 
