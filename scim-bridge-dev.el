@@ -2322,6 +2322,8 @@ i.e. input focus is in this window."
 	(kill-local-variable 'scim-cursor-type-saved))))
     ;; Check selected frame
     (unless (eq (selected-frame) scim-selected-frame)
+      (if (eq window-system 'x)
+	  (scim-frame-top-left-coordinates))
       (setq scim-selected-frame (selected-frame))
       (scim-update-cursor-color))
     (scim-start-focus-observation)))
