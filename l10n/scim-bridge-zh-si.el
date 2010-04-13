@@ -185,13 +185,9 @@
 
 (scim-set-variable-doc
  'scim-undo-by-committed-string
- ;; "If the value is nil, undo is performed bringing some short
- ;;committed strings together or dividing the long committed string
- ;;within the range which does not exceed 20 columns. Otherwise, undo
- ;;is performed to each committed string."
  "如果这个值为空 (nil),
 撤销执行使一些较短的待发字符串链接在一起
-或者按一定的范围 (不超过20个字符) 划分长的待发字符串.
+或者按一定的范围 (不超过20列) 划分长的待发字符串.
 否则撤销在每一个待发字符串后执行.")
 
 (scim-set-variable-doc
@@ -364,12 +360,10 @@
 
 (scim-set-variable-doc
  'scim-bridge-x-display-substitute
- ;; "Don't set this variable unless you want to explicitly specify the
- ;;X display number and screen number. Setting this variable makes
- ;;scim-mode unusable in multi-display environment.
- ;;
- ;;If you set this variable, the value must be a string such as \":0.0\"."
- "")
+ "不要设置这个变量, 除非你想明确的指定 X Window 的显示数和屏幕数.
+设置这个变量会导致 scim 模式无法在多显示器环境中使用.
+
+如果你要设置这个变量, 值必须是字符串, 比如 \":0.0\".")
 
 (scim-set-variable-doc
  'scim-config-file
@@ -386,22 +380,17 @@
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks
- ;; "List of symbols specifying major mode hooks that scim-mode-map is
- ;;deactivated when invoking these hooks."
- "当这个钩子运行, `scim-mode-map' 变为无效.")
+ "指定让 `scim-mode-map' 失效的钩子列表.")
 
 (scim-set-variable-doc
  'scim-preedit-incompatible-commands
- ;; "List of symbols specifying commands which are disabled when preediting."
- "")
+ "指定预编辑时禁用命令的符号列表.")
 
 (scim-set-variable-doc
  'scim-inherit-im-functions
- ;; "List of symbols specifying functions which inherit input method.
- ;;If the function takes the argument INHERIT-INPUT-METHOD, input method
- ;;is inherited only when it's non-nil. Otherwise, input method is
- ;;unconditionally inherited."
- "")
+ "指定继承输入法的函数列表.
+如果函数接受 INHERIT-INPUT-METHOD 参数, 输入法只有当它是非空时才继承.
+否则, 输入法无条件继承.")
 
 ;; Functions
 
