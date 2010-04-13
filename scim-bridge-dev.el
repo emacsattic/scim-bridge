@@ -1343,17 +1343,18 @@ If STRING is empty or nil, the documentation string is left original."
 		   (> (string-width str) 20)))
 	  (setq buffer-undo-list (cons (cons beg end) new-list)))))))
 
-;; Advices for undo commands
-(mapc (lambda (command)
-	(eval
-	 `(defadvice ,command
-	    (around ,(intern (concat "scim-inhibit-" (symbol-name command))) ())
-	    (if scim-preediting-p
-		(error "SCIM: `%s' cannot be used while preediting!" ',command)
-	      ad-do-it))))
-      scim-preedit-incompatible-commands)
+;; Advices for commands which conflict with preediting
+(defun scim-defadvice-disable-for-preedit ()
+  (mapc (lambda (command)
+	  (eval
+	   `(defadvice ,command
+	      (around ,(intern (concat "scim-inhibit-" (symbol-name command))) ())
+	      (if scim-preediting-p
+		  (error "SCIM: `%s' cannot be used while preediting!" ',command)
+		ad-do-it))))
+	scim-preedit-incompatible-commands))
 
-(defun scim-activate-advices-undo (enable)
+(defun scim-activate-advices-disable-for-preedit (enable)
   (with-no-warnings
     (if enable
 	(ad-enable-regexp "^scim-inhibit-")
@@ -3249,7 +3250,8 @@ i.e. input focus is in this window."
 	(scim-cleanup-variables)
 	(setq scim-frame-focus nil)
 	(setq scim-selected-frame (selected-frame))
-	(scim-activate-advices-undo t)
+	(scim-defadvice-disable-for-preedit)
+	(scim-activate-advices-disable-for-preedit t)
 	(scim-defadvice-inherit-imcontext)
 	(scim-activate-advices-inherit-im t)
 	(scim-activate-advice-describe-key t)
@@ -3286,7 +3288,7 @@ i.e. input focus is in this window."
   (setq emulation-mode-map-alists
 	(delq 'scim-mode-map-alist emulation-mode-map-alists))
   (scim-update-kana-ro-key t)
-  (scim-activate-advices-undo nil)
+  (scim-activate-advices-disable-for-preedit nil)
   (scim-activate-advices-inherit-im nil)
   (scim-activate-advice-describe-key nil)
   (scim-disable-isearch)
