@@ -3,13 +3,14 @@ Section: lisp
 Priority: extra
 Maintainer: IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 Build-Depends: debhelper (>= 7)
-Standards-Version: 3.8.3
+Standards-Version: 3.8.4
 Homepage: http://www11.atwiki.jp/s-irie/pages/12.html
 Bugs: https://bugs.launchpad.net/scim-bridge.el
 
 Package: scim-bridge-el
 Architecture: all
-Depends: emacs23 | emacs22 | emacs-snapshot, scim-bridge-agent (>= 0.4.13)
+Depends: ${misc:Depends}, emacs23 | emacs22 | emacs-snapshot,
+	 scim-bridge-agent (>= 0.4.13)
 Suggests: scim-bridge-client-gtk, scim-bridge-client-qt, scim-bridge-client-qt4
 Description: SCIM-Bridge client for GNU Emacs
  The Smart Common Input Method platform (SCIM) is an input
