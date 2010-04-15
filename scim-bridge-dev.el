@@ -363,6 +363,10 @@ system's keyboard configurations with a shell command `xmodmap'."
   :type 'boolean
   :group 'scim-basic)
 
+(define-obsolete-variable-alias
+  'scim-key-release-delay 'scim-simultaneous-pressing-time
+  "scim-bridge.el version 0.7.3")
+
 (defcustom scim-simultaneous-pressing-time nil
   "If you use Japanese thumb shift typing method on SCIM-Anthy,
 specify the time interval (in seconds) which is corresponding to
@@ -371,10 +375,6 @@ within this time interval are sent to SCIM as a simultaneous keystroke."
   :type '(choice (const :tag "none" nil)
 		 (number :tag "interval (sec.)" :value 0.1))
   :group 'scim-basic)
-
-(define-obsolete-variable-alias
-  'scim-key-release-delay 'scim-simultaneous-pressing-time
-  "scim-bridge.el version 0.7.3")
 
 (defcustom scim-undo-by-committed-string nil
   "If the value is nil, undo is performed bringing some short
@@ -619,16 +619,17 @@ the milliseconds."
 	  scim-bridge-compat-version "." scim-bridge-socket-name "-"
 	  (number-to-string (user-uid)) "@"
 	  scim-bridge-host-name))
+
+(define-obsolete-variable-alias
+  'scim-bridge-x-display-name 'scim-bridge-x-display-substitute
+  "Version 0.7.5")
+
 (defvar scim-bridge-x-display-substitute nil
   "Don't set this variable unless you want to explicitly specify the
 X display number and screen number. Setting this variable makes
 scim-mode unusable in multi-display environment.
 
 If you set this variable, the value must be a string such as \":0.0\".")
-
-(define-obsolete-variable-alias
-  'scim-bridge-x-display-name 'scim-bridge-x-display-substitute
-  "Version 0.7.5")
 
 (defvar scim-config-file "~/.scim/config"
   "The name of SCIM's configuration file, which is used to detect
@@ -648,13 +649,13 @@ value manually before scim-bridge.el is loaded.")
   "List of symbols specifying major mode hooks that `scim-mode-map' is
 deactivated when invoking these hooks.")
 
-(defvar scim-preedit-incompatible-commands
-  '(undo undo-only redo undo-tree-undo undo-tree-redo)
-  "List of symbols specifying commands which are disabled when preediting.")
-
 (define-obsolete-variable-alias
   'scim-undo-command-list 'scim-preedit-incompatible-commands
   "Version 0.8.0")
+
+(defvar scim-preedit-incompatible-commands
+  '(undo undo-only redo undo-tree-undo undo-tree-redo)
+  "List of symbols specifying commands which are disabled when preediting.")
 
 (defvar scim-inherit-im-functions
   '(read-from-minibuffer read-string read-no-blanks-input completing-read)
