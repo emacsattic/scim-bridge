@@ -622,7 +622,7 @@ the milliseconds."
 
 (define-obsolete-variable-alias
   'scim-bridge-x-display-name 'scim-bridge-x-display-substitute
-  "Version 0.7.5")
+  "scim-bridge.el version 0.7.5")
 
 (defvar scim-bridge-x-display-substitute nil
   "Don't set this variable unless you want to explicitly specify the
@@ -651,7 +651,7 @@ deactivated when invoking these hooks.")
 
 (define-obsolete-variable-alias
   'scim-undo-command-list 'scim-preedit-incompatible-commands
-  "Version 0.8.0")
+  "scim-bridge.el version 0.8.0")
 
 (defvar scim-preedit-incompatible-commands
   '(undo undo-only redo undo-tree-undo undo-tree-redo)
