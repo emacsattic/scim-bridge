@@ -1118,6 +1118,7 @@ use either \\[customize] or the function `scim-mode'."
 
 ;; Minibuffer
 (defvar scim-parent-buffer-group nil)
+(defvar scim-force-inherit-im nil)
 (defvar scim-isearch-buffer-group nil)
 (defvar scim-isearch-minibuffer nil)
 
@@ -2342,12 +2343,16 @@ i.e. input focus is in this window."
   (mapc (lambda (command)
 	  (eval
 	   `(defadvice ,command
-	      (before ,(intern (concat "scim-inherit-im-" (symbol-name command))) ())
+	      (around ,(intern (concat "scim-inherit-im-" (symbol-name command))) ())
 	      (if (and (with-no-warnings
 			 (or (not (boundp 'inherit-input-method))
-			     inherit-input-method))
+			     inherit-input-method
+			     scim-force-inherit-im))
 		       (stringp scim-imcontext-id))
-		  (setq scim-parent-buffer-group scim-buffer-group)))))
+		  (let ((scim-force-inherit-im t))
+		    (setq scim-parent-buffer-group scim-buffer-group)
+		    ad-do-it)
+		ad-do-it))))
 	scim-inherit-im-functions))
 
 (defun scim-activate-advices-inherit-im (enable)
