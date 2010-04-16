@@ -2345,7 +2345,7 @@ i.e. input focus is in this window."
 	   `(defadvice ,command
 	      (around ,(intern (concat "scim-inherit-im-" (symbol-name command))) ())
 	      (if (and (with-no-warnings
-			 (or (not (boundp 'inherit-input-method))
+			 (or (null (assq 'inherit-input-method ad-arg-bindings))
 			     inherit-input-method
 			     scim-force-inherit-im))
 		       (stringp scim-imcontext-id))
