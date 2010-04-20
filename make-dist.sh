@@ -88,8 +88,12 @@ CURRDIR="$PWD"
 rm -rfv $WORKDIR
 mkdir -pv $ARCHDIR
 
-echo "comment out debug codes in $EL_DEV -> ${ARCHDIR}/${EL_MAIN}"
-sed "s/\(${DBGREGEXP}\)/;#\1/" $EL_DEV > ${ARCHDIR}/${EL_MAIN}
+if [ "$DBGREGEXP" == "" ]; then
+    cp -pv $EL_DEV ${ARCHDIR}/${EL_MAIN}
+else
+    echo "comment out debug codes in $EL_DEV -> ${ARCHDIR}/${EL_MAIN}"
+    sed "s/\(${DBGREGEXP}\)/;#\1/" $EL_DEV > ${ARCHDIR}/${EL_MAIN}
+fi
 
 for i in ${FILES[@]}; do
     cp -rpv $i $ARCHDIR
