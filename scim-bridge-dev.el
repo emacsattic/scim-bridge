@@ -1613,7 +1613,10 @@ restart scim-mode so that this settings may become effective."
 ;; Advice for `describe-key'
 (defadvice describe-key
   (around scim-describe-key ())
-  (when scim-mode
+  (cond
+   ((not scim-mode)
+    ad-do-it)
+   ((null scim-mode-map-alist)
     ;; Translate Jananese kana RO key
     (if (commandp (lookup-key (scim-make-keymap-internal
 			       (scim-combine-modifiers
@@ -1625,24 +1628,24 @@ restart scim-mode so that this settings may become effective."
 		     (event-convert-list
 		      (delq 'shift
 			    (append mods (list (if (memq 'shift mods) 95 92)))))))))
-    ;; Translate function key
-    (let ((cmd1 (and (boundp 'local-function-key-map)
-		     (lookup-key local-function-key-map key))))
-      (if (commandp cmd1)
-	  (setq key cmd1)
-	(let ((cmd2 (lookup-key function-key-map key)))
-	  (if (commandp cmd2)
-	      (setq key cmd2)))))
+    ad-do-it)
+   (t
     ;; Set modified flag of *Help* buffer in order to detect
     ;; whether *Help* is updated or not.
-    (when scim-mode
-      (with-current-buffer (help-buffer)
-	(set-buffer-modified-p t))))
-  ;; Invoke `describe-key' without scim-mode's keymaps
-  (let ((scim-mode-map-alist nil))
-    ad-do-it)
-  ;; Added descriptions to *Help* buffer, if any
-  (when scim-mode
+    (with-current-buffer (help-buffer)
+      (set-buffer-modified-p t))
+    (if (eq (key-binding key) 'scim-handle-event)
+	;; Invoke `describe-key' without scim-mode's keymaps
+	(let ((scim-mode-map-alist nil))
+	  (if scim-keymap-overlay
+	      (overlay-put scim-keymap-overlay 'keymap nil))
+	  (setq unread-command-events
+		(nconc (listify-key-sequence key) unread-command-events))
+	  (call-interactively 'describe-key)
+	  (if scim-keymap-overlay
+	      (overlay-put scim-keymap-overlay 'keymap scim-mode-preedit-map)))
+      ad-do-it)
+    ;; Add descriptions to *Help* buffer, if any
     (with-current-buffer (help-buffer)
       (let* ((raw (vector (aref (this-single-command-raw-keys) 0)))
 	     (format (format "SCIM: scim-mode handles %s when %%s.\n"
@@ -1669,8 +1672,8 @@ restart scim-mode so that this settings may become effective."
 	  (if common
 	      (insert (format format "SCIM is active")))
 	  (if (if scim-use-minimum-keymap minimum common)
-	    (insert (format format "SCIM is not active")))
-	  (insert "\n"))))))
+	      (insert (format format "SCIM is not active")))
+	  (insert "\n")))))))
 
 (defun scim-activate-advice-describe-key (enable)
   (if enable
