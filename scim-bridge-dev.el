@@ -645,7 +645,7 @@ value manually before scim-bridge.el is loaded.")
   "This is working buffer name used for communicating with the agent.")
 
 (defvar scim-incompatible-mode-hooks
-  '(ediff-mode-hook ebrowse-tree-mode-hook w3m-mode-hook)
+  '(ebrowse-tree-mode-hook w3m-mode-hook)
   "List of symbols specifying major mode hooks that `scim-mode-map' is
 deactivated when invoking these hooks.")
 
@@ -3277,6 +3277,7 @@ i.e. input focus is in this window."
 	(mapc (lambda (hook)
 		(add-hook hook 'scim-disable-keymap))
 	      scim-incompatible-mode-hooks)
+	(add-hook 'ediff-startup-hook 'scim-check-current-buffer)
 	(add-hook 'post-command-hook 'scim-check-current-buffer)
 	(scim-log "post-command-hook: %s" post-command-hook)
 	(add-hook 'after-make-frame-functions 'scim-after-make-frame-function)
@@ -3292,6 +3293,7 @@ i.e. input focus is in this window."
 	(buffer-list))
   (remove-hook 'after-make-frame-functions 'scim-after-make-frame-function)
   (remove-hook 'post-command-hook 'scim-check-current-buffer)
+  (remove-hook 'ediff-startup-hook 'scim-check-current-buffer)
   (mapc (lambda (hook)
 	  (remove-hook hook 'scim-disable-keymap))
 	scim-incompatible-mode-hooks)
