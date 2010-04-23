@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.7.5.50")
+(defconst scim-mode-version "0.8.0")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -72,6 +72,20 @@
 ;;
 
 ;;; History:
+;; 2010-04-23  S. Irie
+;;         * Add files for building deb package
+;;         * Add support for multi-display environment
+;;         * Add support for INHERIT-INPUT-METHOD arg of `read-from-minibuffer' etc.
+;;         * Add support for input focus redirection
+;;         * Change maximum length of undo to 20 columns rather than 20 characters
+;;         * Modify not to override descriptions of many keybindings
+;;         * Modify not to override cursor color of auto-complete's fuzzy completion
+;;         * Modify so that scim-mode is safely turned off when errors occur
+;;         * Modify yasnippet support to work correctly for version 0.6
+;;         * Reimplement functions for calculating pixel coordinates of point
+;;         * Bug fixes
+;;         * Version 0.8.0
+;;
 ;; 2010-03-02  S. Irie
 ;;         * Add support for daemon mode
 ;;         * Add support for term.el (ansi-term)

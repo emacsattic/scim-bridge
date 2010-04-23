@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-en-version "0.7.5.50")
+(defconst scim-bridge-en-version "0.8.0")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -74,6 +74,10 @@
 ;;
 
 ;; History:
+;; 2010-04-23  S. Irie
+;;         * Add/modify/delete translations
+;;         * Version 0.8.0
+;;
 ;; 2010-03-02  S. Irie
 ;;         * Modify translation
 ;;         * Version 0.7.5
