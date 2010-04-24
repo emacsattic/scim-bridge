@@ -54,6 +54,15 @@ Chinese (traditional):
  (require 'scim-bridge-zh-tr)
  (add-hook 'after-init-hook 'scim-mode-on)
 
+
+To disable XIM in Emacs, put the following in ~/.Xresources:
+
+ Emacs*useXIM: false
+
+and restart X session or execute a command:
+
+ xrdb ~/.Xresources
+
 ----------------------------------------------------------------------
 4. Web sites
 ----------------------------------------------------------------------
