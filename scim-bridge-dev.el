@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0")
+(defconst scim-mode-version "0.8.0.1")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2246,105 +2246,106 @@ i.e. input focus is in this window."
   (catch 'exit
     (scim-cancel-focus-update-timer)
     (setq scim-last-rejected-event nil)
-    (let ((buffer (current-buffer))
-	  (visited-p scim-buffer-group)
-	  (non-x-p (not (eq window-system 'x)))
-	  (display-unchanged-p (equal (scim-get-x-display)
-				      scim-selected-display)))
-      ;; Switch IMContext between global and local
-      (unless (or non-x-p
-		  (not visited-p)
-		  (scim-buffer-group-suitable-p))
-	(setq visited-p nil)
-	(if (eq buffer scim-current-buffer)
-	    (scim-deregister-imcontext)
-	  (let ((scim-current-buffer buffer))
-	    (scim-deregister-imcontext))))
-      ;; Change focus if buffer is switched to another one or display is changed
-      (unless (and (eq buffer scim-current-buffer)
-		   (if non-x-p
-		       (null scim-imcontext-id)
-		     (and scim-imcontext-id
-			  display-unchanged-p)))
-	;; Focus out from previous buffer
-	(scim-log "buffer was changed from %S to %S" scim-current-buffer buffer)
-	(when (buffer-live-p scim-current-buffer)
-	  (with-current-buffer scim-current-buffer
-	    (when (stringp scim-imcontext-id)
-	      (when scim-frame-focus
-		(scim-change-focus nil) ; Send
-		(scim-bridge-receive)) ; Receive
-	      (if scim-preediting-p
-		  ;; Cleenup preedit if focus change become timeout
-		  (scim-abort-preedit)))))
-	;; Setup currently selected buffer
-	(unless display-unchanged-p
-	  (scim-change-x-display))
-	(setq scim-current-buffer buffer)
-	(let* ((group-id (or scim-buffer-group
-			     scim-parent-buffer-group
-			     (scim-buffer-group-identifier)))
-	       (group (assq group-id scim-buffer-group-alist)))
-	  (setq scim-imcontext-id (cdr (assoc scim-selected-display
-					      (cadr group)))
-		scim-imcontext-status (cdr (assoc scim-selected-display
-						  (nth 2 group))))
-	  (unless scim-buffer-group
-	    (setq scim-buffer-group group-id)
-	    (when scim-parent-buffer-group
-	      ;; Inherit IMContext
-	      (scim-log "inherit IMContext (buffer group: %s)" group-id)
-	      (setcar (nthcdr 3 group)
-		      (cons buffer (delq buffer (nth 3 group)))))
-	    (add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)))
-	;; Check whether buffer is already registered
+    (with-current-buffer (window-buffer)
+      (let ((buffer (current-buffer))
+	    (visited-p scim-buffer-group)
+	    (non-x-p (not (eq window-system 'x)))
+	    (display-unchanged-p (equal (scim-get-x-display)
+					scim-selected-display)))
+	;; Switch IMContext between global and local
 	(unless (or non-x-p
-		    (and visited-p scim-imcontext-id))
-	  (scim-log "new buffer was detected: %S" buffer)
-	  (condition-case nil
-	      (scim-register-imcontext)
-	    (error (throw 'exit nil))))
-	;; `scim-preedit-string' not empty means
-	;; continuous preediting of incremental search
-	(when (string= scim-preedit-string "")
-	  ;; Focus in if window is active
-	  (setq scim-frame-focus nil)
-	  (if (stringp scim-imcontext-id)
-	      (scim-check-frame-focus t)))
-	(scim-set-keymap-parent)
+		    (not visited-p)
+		    (scim-buffer-group-suitable-p))
+	  (setq visited-p nil)
+	  (if (eq buffer scim-current-buffer)
+	      (scim-deregister-imcontext)
+	    (let ((scim-current-buffer buffer))
+	      (scim-deregister-imcontext))))
+	;; Change focus if buffer is switched to another one or display is changed
+	(unless (and (eq buffer scim-current-buffer)
+		     (if non-x-p
+			 (null scim-imcontext-id)
+		       (and scim-imcontext-id
+			    display-unchanged-p)))
+	  ;; Focus out from previous buffer
+	  (scim-log "buffer was changed from %S to %S" scim-current-buffer buffer)
+	  (when (buffer-live-p scim-current-buffer)
+	    (with-current-buffer scim-current-buffer
+	      (when (stringp scim-imcontext-id)
+		(when scim-frame-focus
+		  (scim-change-focus nil) ; Send
+		  (scim-bridge-receive)) ; Receive
+		(if scim-preediting-p
+		    ;; Cleenup preedit if focus change become timeout
+		    (scim-abort-preedit)))))
+	  ;; Setup currently selected buffer
+	  (unless display-unchanged-p
+	    (scim-change-x-display))
+	  (setq scim-current-buffer buffer)
+	  (let* ((group-id (or scim-buffer-group
+			       scim-parent-buffer-group
+			       (scim-buffer-group-identifier)))
+		 (group (assq group-id scim-buffer-group-alist)))
+	    (setq scim-imcontext-id (cdr (assoc scim-selected-display
+						(cadr group)))
+		  scim-imcontext-status (cdr (assoc scim-selected-display
+						    (nth 2 group))))
+	    (unless scim-buffer-group
+	      (setq scim-buffer-group group-id)
+	      (when scim-parent-buffer-group
+		;; Inherit IMContext
+		(scim-log "inherit IMContext (buffer group: %s)" group-id)
+		(setcar (nthcdr 3 group)
+			(cons buffer (delq buffer (nth 3 group)))))
+	      (add-hook 'kill-buffer-hook 'scim-kill-buffer-function nil t)))
+	  ;; Check whether buffer is already registered
+	  (unless (or non-x-p
+		      (and visited-p scim-imcontext-id))
+	    (scim-log "new buffer was detected: %S" buffer)
+	    (condition-case nil
+		(scim-register-imcontext)
+	      (error (throw 'exit nil))))
+	  ;; `scim-preedit-string' not empty means
+	  ;; continuous preediting of incremental search
+	  (when (string= scim-preedit-string "")
+	    ;; Focus in if window is active
+	    (setq scim-frame-focus nil)
+	    (if (stringp scim-imcontext-id)
+		(scim-check-frame-focus t)))
+	  (scim-set-keymap-parent)
+	  (scim-update-cursor-color)))
+      (setq scim-parent-buffer-group nil)
+      ;; Disable keymap if buffer is read-only, explicitly disabled, or vi-mode.
+      (if (eq (and (or buffer-read-only
+		       scim-mode-map-disabled
+		       (eq major-mode 'vi-mode)
+		       (and (boundp 'vip-current-mode)
+			    (eq vip-current-mode 'vi-mode))
+		       (and (boundp 'viper-current-state)
+			    (eq viper-current-state 'vi-state)))
+		   (not (and isearch-mode
+			     scim-use-kana-ro-key
+			     scim-kana-ro-x-keysym)))
+	      (not scim-mode-map-prev-disabled))
+	  (scim-switch-keymap scim-mode-map-prev-disabled))
+      ;; Set/restore cursor shape
+      (when (local-variable-p 'scim-cursor-type-saved)
+	(cond
+	 (scim-preediting-p
+	  (setq cursor-type scim-cursor-type-for-candidate))
+	 (isearch-mode
+	  (setq cursor-type scim-isearch-cursor-type))
+	 (t
+	  (if (eq scim-cursor-type-saved 1)
+	      (kill-local-variable 'cursor-type)
+	    (setq cursor-type scim-cursor-type-saved))
+	  (kill-local-variable 'scim-cursor-type-saved))))
+      ;; Check selected frame
+      (unless (eq (selected-frame) scim-selected-frame)
+	(if (eq window-system 'x)
+	    (scim-frame-top-left-coordinates))
+	(setq scim-selected-frame (selected-frame))
 	(scim-update-cursor-color)))
-    (setq scim-parent-buffer-group nil)
-    ;; Disable keymap if buffer is read-only, explicitly disabled, or vi-mode.
-    (if (eq (and (or buffer-read-only
-		     scim-mode-map-disabled
-		     (eq major-mode 'vi-mode)
-		     (and (boundp 'vip-current-mode)
-			  (eq vip-current-mode 'vi-mode))
-		     (and (boundp 'viper-current-state)
-			  (eq viper-current-state 'vi-state)))
-		 (not (and isearch-mode
-			   scim-use-kana-ro-key
-			   scim-kana-ro-x-keysym)))
-	    (not scim-mode-map-prev-disabled))
-	(scim-switch-keymap scim-mode-map-prev-disabled))
-    ;; Set/restore cursor shape
-    (when (local-variable-p 'scim-cursor-type-saved)
-      (cond
-       (scim-preediting-p
-	(setq cursor-type scim-cursor-type-for-candidate))
-       (isearch-mode
-	(setq cursor-type scim-isearch-cursor-type))
-       (t
-	(if (eq scim-cursor-type-saved 1)
-	    (kill-local-variable 'cursor-type)
-	  (setq cursor-type scim-cursor-type-saved))
-	(kill-local-variable 'scim-cursor-type-saved))))
-    ;; Check selected frame
-    (unless (eq (selected-frame) scim-selected-frame)
-      (if (eq window-system 'x)
-	  (scim-frame-top-left-coordinates))
-      (setq scim-selected-frame (selected-frame))
-      (scim-update-cursor-color))
     (scim-start-focus-observation)))
 
 (defun scim-kill-buffer-function ()
