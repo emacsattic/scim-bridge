@@ -59,7 +59,7 @@ To disable XIM in Emacs, put the following in ~/.Xresources:
 
  Emacs*useXIM: false
 
-and restart X session or execute a command:
+and restart X session or execute a shell command:
 
  xrdb ~/.Xresources
 
