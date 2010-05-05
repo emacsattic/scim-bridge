@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-ja-version "0.8.0")
+(defconst scim-bridge-ja-version "0.8.0.2")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -45,14 +45,15 @@
 ;; 以下の行を .emacs ファイルに追加します。
 ;;
 ;;   (require 'scim-bridge-ja)
+;;   (add-hook 'after-init-hook 'scim-mode-on)
 ;;
-;; Emacs を起動するときは、コマンドラインから以下のように打ち込んで下さい。
+;; EmacsでXIMを無効にするために、~/.Xresources ファイルに
 ;;
-;;   XMODIFIERS=@im=none emacs
+;;   Emacs*useXIM: false
 ;;
-;; 起動したら、scim-mode を ON にします。
+;; を追加し、Xセッションを再スタートするか、以下のシェルコマンドを実行します。
 ;;
-;;   M-x scim-mode
+;;   xrdb ~/.Xresources
 ;;
 ;;
 ;; .emacs ファイルの設定例です。

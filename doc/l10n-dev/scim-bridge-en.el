@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-en-version "0.8.0")
+(defconst scim-bridge-en-version "0.8.0.2")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -46,14 +46,15 @@
 ;; Put the following in your .emacs file:
 ;;
 ;;   (require 'scim-bridge-en)
+;;   (add-hook 'after-init-hook 'scim-mode-on)
 ;;
-;; After that, execute Emacs by typing on command line:
+;; To disable XIM in Emacs, put the following in ~/.Xresources:
 ;;
-;;   XMODIFIERS=@im=none emacs
+;;   Emacs*useXIM: false
 ;;
-;; and turn on scim-mode:
+;; and restart X session or execute a shell command:
 ;;
-;;   M-x scim-mode
+;;   xrdb ~/.Xresources
 ;;
 ;;
 ;; Here is the example of settings in .emacs:
