@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.5")
+(defconst scim-mode-version "0.8.0.6")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1401,11 +1401,14 @@ If STRING is empty or nil, the documentation string is left original."
 		     (cond
 		      ((or (not scim-frame-focus)
 			   scim-mode-map-prev-disabled)
+		       (scim-log "use empty keymap")
 		       nil)
 		      ((or (not scim-use-minimum-keymap)
 			   scim-imcontext-status)
+		       (scim-log "use common keymap")
 		       scim-mode-common-map)
 		      (t
+		       (scim-log "use minimum keymap")
 		       scim-mode-minimum-map))))
 
 (defun scim-enable-kana-ro-key (&optional keysym)
