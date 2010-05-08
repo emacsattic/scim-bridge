@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.7")
+(defconst scim-mode-version "0.8.0.8")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2976,8 +2976,8 @@ i.e. input focus is in this window."
 					      (cadr group))))
 	       (scim-imcontext-status (cdr (assoc scim-selected-display
 						  (nth 2 group)))))
-	  (scim-exec-callback-1 (cdr queue))
-	  (setq scim-callback-queue (cdr scim-callback-queue))))
+	  (setq scim-callback-queue (cdr scim-callback-queue))
+	  (scim-exec-callback-1 (cdr queue))))
       (let ((group (assq scim-buffer-group scim-buffer-group-alist)))
 	(setq scim-imcontext-id (cdr (assoc scim-selected-display
 					    (cadr group)))
