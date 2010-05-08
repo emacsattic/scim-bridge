@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.6")
+(defconst scim-mode-version "0.8.0.7")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2494,7 +2494,7 @@ i.e. input focus is in this window."
 		      (delq 'scim-dummy-event unread-command-events))))
 	(if (string= repl "")
 	    (scim-message "Data reception became timeout.")
-	  (scim-parse-reply (scim-split-commands repl)))))))
+	  (scim-parse-reply (scim-split-commands repl) passive))))))
 
 (defun scim-bridge-send-only (command)
   (condition-case err
@@ -2965,6 +2965,7 @@ i.e. input focus is in this window."
 		(delq 'scim-dummy-event unread-command-events))))
   (when (buffer-live-p scim-current-buffer)
     (with-current-buffer scim-current-buffer
+      (scim-log "callback queue: %s" (pp-to-string scim-callback-queue))
       (while scim-callback-queue
 	(let* ((queue (car scim-callback-queue))
 	       (scim-bridge-socket (car queue))
