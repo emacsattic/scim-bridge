@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.3")
+(defconst scim-mode-version "0.8.0.4")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1410,19 +1410,20 @@ If STRING is empty or nil, the documentation string is left original."
 
 (defun scim-enable-kana-ro-key (&optional keysym)
   (unless keysym (setq keysym scim-kana-ro-x-keysym))
-  (scim-log "enable Kana-RO key: %s" keysym)
-  (shell-command-to-string
-   (concat "xmodmap -pke | sed -n 's/= backslash underscore/= "
-	   keysym " underscore/p' | xmodmap -"))
-  (setq scim-kana-ro-prev-x-keysym keysym))
+  (when keysym
+    (scim-log "enable Kana-RO key: %s" keysym)
+    (shell-command-to-string
+     (concat "xmodmap -pke | sed -n 's/\\(\\(=\\) backslash underscore\\| backslash underscore$\\)/\\2 "
+	     keysym " underscore/gp' | xmodmap -"))
+    (setq scim-kana-ro-prev-x-keysym keysym)))
 
 (defun scim-disable-kana-ro-key (&optional keysym)
   (unless keysym (setq keysym scim-kana-ro-prev-x-keysym))
   (when keysym
     (scim-log "disable Kana-RO key: %s" keysym)
     (shell-command-to-string
-     (concat "xmodmap -pke | sed -n 's/= " keysym
-	     " underscore/= backslash underscore/p' | xmodmap -"))
+     (concat "xmodmap -pke | sed -n 's/\\(\\(=\\) " keysym " underscore\\| " keysym
+	     " underscore$\\)/\\2 backslash underscore/gp' | xmodmap -"))
     (setq scim-kana-ro-prev-x-keysym nil)))
 
 (defun scim-get-keyboard-layout ()
