@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.10")
+(defconst scim-mode-version "0.8.0.11")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2412,7 +2412,7 @@ i.e. input focus is in this window."
       ;; Succeeded
       (scim-check-current-buffer)
     ;; Failed
-    (scim-message "Socket is unexpectedly closed. Turned off scim-mode.")))
+    (scim-message "Socket was unexpectedly closed. Turned off scim-mode.")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Connect
