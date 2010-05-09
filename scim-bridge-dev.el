@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.9")
+(defconst scim-mode-version "0.8.0.10")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2402,7 +2402,7 @@ i.e. input focus is in this window."
 	  (delete-process proc)
 	  (scim-log "process: %s  status: %s" proc (process-status proc))
 	  )
-      (error (scim-message "%S: %S" (car err) (cadr err))))
+      (error (scim-message "%S: %S" (car err) (cdr err))))
     (setq scim-bridge-socket nil)))
 
 (defun scim-bridge-process-sentinel (proc stat)
@@ -2417,7 +2417,7 @@ i.e. input focus is in this window."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Connect
 (defun scim-bridge-connect-internal ()
-  (let* ((display  (scim-get-x-display))
+  (let* ((display (scim-get-x-display))
 	 (socket (concat scim-bridge-socket-path-common display))
 	 (buffer (progn
 		   (string-match "\\(\\**\\)$" scim-tmp-buffer-name)
@@ -2442,7 +2442,7 @@ i.e. input focus is in this window."
 		    nil))
 	    i (1+ i)))
     (unless (processp proc)
-      (scim-message "%S: %S" (car error) (cadr error)))
+      (scim-message "%S: %S" (car error) (cdr error)))
     proc))
 
 (defun scim-bridge-connect ()
