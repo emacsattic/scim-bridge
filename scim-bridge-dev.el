@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.11")
+(defconst scim-mode-version "0.8.0.12")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2746,13 +2746,17 @@ i.e. input focus is in this window."
 		unread-command-events
 		(cons scim-last-command-event unread-command-events))
 	  (remove-hook 'post-command-hook 'scim-check-current-buffer)
-	  (add-hook 'pre-command-hook 'scim-rejected-event-command-pre-function)))))
+	  (add-hook 'pre-command-hook 'scim-fallback-pre-function)))))
   (setq scim-last-rejected-event scim-last-command-event
 	scim-last-command-event nil))
 
-(defun scim-rejected-event-command-pre-function ()
+(defun scim-fallback-pre-function ()
+  (remove-hook 'pre-command-hook 'scim-fallback-pre-function)
   (add-hook 'post-command-hook 'scim-check-current-buffer)
-  (remove-hook 'pre-command-hook 'scim-rejected-event-command-pre-function)
+  (add-hook 'post-command-hook 'scim-fallback-post-function))
+
+(defun scim-fallback-post-function ()
+  (remove-hook 'post-command-hook 'scim-fallback-post-function)
   (if scim-keymap-overlay
       (overlay-put scim-keymap-overlay 'keymap scim-mode-preedit-map))
   (scim-set-mode-map-alist))
@@ -3070,7 +3074,7 @@ i.e. input focus is in this window."
 	;; IMContext is not registered or key event is not recognized
 	(scim-key-event-handled "false"))))
   ;; Repair post-command-hook
-  (unless (memq 'scim-rejected-event-command-pre-function
+  (unless (memq 'scim-fallback-pre-function
 		(default-value 'pre-command-hook))
     (when (and (local-variable-p 'post-command-hook)
 	       (not (memq t post-command-hook)))
