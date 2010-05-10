@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.12")
+(defconst scim-mode-version "0.8.0.13")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -3335,9 +3335,9 @@ i.e. input focus is in this window."
   (scim-cleanup-preedit)
   (mapc (lambda (pair)
 	  (setq scim-bridge-socket (cdr pair))
-	  (scim-bridge-disconnect)
-	  (setcdr pair nil))
+	  (scim-bridge-disconnect))
 	scim-bridge-socket-alist)
+  (setq scim-bridge-socket-alist nil)
   (setq-default scim-mode nil)
   (scim-cleanup-variables)
   (scim-set-cursor-color)
