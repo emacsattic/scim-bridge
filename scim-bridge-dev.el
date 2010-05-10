@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.16")
+(defconst scim-mode-version "0.8.0.17")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1925,8 +1925,8 @@ i.e. input focus is in this window."
 	  (setq scim-bridge-socket-alist (cons (cons display scim-bridge-socket)
 					       scim-bridge-socket-alist)
 		scim-selected-display display)
-	(scim-mode-off)
-	(error "SCIM: Unable to open socket for display %s" display)))))
+	(scim-mode-quit)
+	(error "Unable to open socket for display %S. Turned off scim-mode." display)))))
 
 (defun scim-config-file-timestamp ()
   (nth 5 (file-attributes scim-config-file)))
@@ -2281,7 +2281,11 @@ i.e. input focus is in this window."
 		    (scim-abort-preedit)))))
 	  ;; Setup currently selected buffer
 	  (unless display-unchanged-p
-	    (scim-change-x-display))
+	    (condition-case err
+		(scim-change-x-display)
+	      (error
+	       (scim-message "%s: %s" (car err) (if (cddr err) (cdr err) (cadr err)))
+	       (throw 'exit nil))))
 	  (setq scim-current-buffer buffer)
 	  (let* ((group-id (or scim-buffer-group
 			       scim-parent-buffer-group
@@ -2303,9 +2307,11 @@ i.e. input focus is in this window."
 	  (unless (or non-x-p
 		      (and visited-p scim-imcontext-id))
 	    (scim-log "new buffer was detected: %S" buffer)
-	    (condition-case nil
+	    (condition-case err
 		(scim-register-imcontext)
-	      (error (throw 'exit nil))))
+	      (error
+	       (scim-message "%s: %s" (car err) (if (cddr err) (cdr err) (cadr err)))
+	       (throw 'exit nil))))
 	  ;; `scim-preedit-string' not empty means
 	  ;; continuous preediting of incremental search
 	  (when (string= scim-preedit-string "")
@@ -2538,8 +2544,7 @@ i.e. input focus is in this window."
 	  (sit-for 0.1)))
       (unless (stringp scim-imcontext-id)
 	(scim-mode-quit)
-	(scim-message "Couldn't register imcontext. Turned off scim-mode.")
-	(error))
+	(error "Couldn't register imcontext. Turned off scim-mode."))
       (setcdr group
 	      (list (cons (cons scim-selected-display scim-imcontext-id)
 			  (cadr group))
