@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.14")
+(defconst scim-mode-version "0.8.0.15")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -3280,8 +3280,8 @@ i.e. input focus is in this window."
 	;; Turn on minor mode
 	(setq-default scim-mode t)
 	(scim-cleanup-variables)
-	(setq scim-frame-focus nil)
-	(setq scim-selected-frame (selected-frame))
+	(setq scim-frame-focus nil
+	      scim-selected-frame (selected-frame))
 	(scim-defadvice-disable-for-preedit)
 	(scim-activate-advices-disable-for-preedit t)
 	(scim-defadvice-inherit-imcontext)
