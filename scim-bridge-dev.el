@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.13")
+(defconst scim-mode-version "0.8.0.14")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1712,10 +1712,6 @@ restart scim-mode so that this settings may become effective."
 		    (screen (and (not (string-match "\\.[0-9]+$" display)) ".0")))
 	       (concat display screen))))))
 
-(defun scim-update-mode-line ()
-  (force-mode-line-update)
-  scim-mode) ; Return value
-
 (defun scim-set-cursor-color (&optional single-frame)
   (let ((color (cond
 		;;    |      `scim-cursor-color'     |   ON   |   OFF  |Disabled|
@@ -3308,8 +3304,8 @@ i.e. input focus is in this window."
 	(add-hook 'after-make-frame-functions 'scim-after-make-frame-function)
 	(add-hook 'kill-emacs-hook 'scim-mode-off)
 	(scim-log "scim-mode ON")
-	))
-    (scim-update-mode-line)))
+	)))
+  scim-mode)
 
 (defun scim-mode-quit ()
   (remove-hook 'kill-emacs-hook 'scim-mode-off)
@@ -3342,7 +3338,7 @@ i.e. input focus is in this window."
   (scim-cleanup-variables)
   (scim-set-cursor-color)
   (scim-log "scim-mode OFF")
-  (scim-update-mode-line))
+  scim-mode)
 
 (defun scim-mode-off ()
   (interactive)
