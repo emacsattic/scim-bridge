@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.17")
+(defconst scim-mode-version "0.8.0.18")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2285,6 +2285,7 @@ i.e. input focus is in this window."
 		(scim-change-x-display)
 	      (error
 	       (scim-message "%s: %s" (car err) (if (cddr err) (cdr err) (cadr err)))
+	       (if scim-mode (scim-mode-quit))
 	       (throw 'exit nil))))
 	  (setq scim-current-buffer buffer)
 	  (let* ((group-id (or scim-buffer-group
@@ -2311,6 +2312,7 @@ i.e. input focus is in this window."
 		(scim-register-imcontext)
 	      (error
 	       (scim-message "%s: %s" (car err) (if (cddr err) (cdr err) (cadr err)))
+	       (if scim-mode (scim-mode-quit))
 	       (throw 'exit nil))))
 	  ;; `scim-preedit-string' not empty means
 	  ;; continuous preediting of incremental search
