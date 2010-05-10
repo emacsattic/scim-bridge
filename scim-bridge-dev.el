@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.15")
+(defconst scim-mode-version "0.8.0.16")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -3344,12 +3344,16 @@ i.e. input focus is in this window."
   (interactive)
   (when (and (stringp scim-imcontext-id)
 	     scim-frame-focus)
-    (scim-change-focus nil)
-    (setq scim-frame-focus nil))
+    (condition-case err
+	(scim-change-focus nil)
+      (error (scim-message "%S" err))))
+  (setq scim-frame-focus nil)
   ;; Deregister IMContext IDs
   (mapc (lambda (group)
 	  (let ((scim-imcontext-id (cdar (cadr group))))
-	    (scim-deregister-imcontext)))
+	    (condition-case err
+		(scim-deregister-imcontext)
+	      (error (scim-message "%S" err)))))
 	scim-buffer-group-alist)
   ;; Turn off minor mode
   (scim-mode-quit))
