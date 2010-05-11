@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.18")
+(defconst scim-mode-version "0.8.0.19")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1291,7 +1291,7 @@ If STRING is empty or nil, the documentation string is left original."
 	(save-selected-window
 	  (if window (select-window window))
 	  (goto-char (point-max))
-	  (insert (concat (format log-str) "\n"))
+	  (insert log-str ?\n)
 	  (if window (recenter -1)))))))
 
 (defun scim-log (format-string &rest args)
