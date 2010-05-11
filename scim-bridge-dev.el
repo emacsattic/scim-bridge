@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.21")
+(defconst scim-mode-version "0.8.0.22")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1951,14 +1951,21 @@ i.e. input focus is in this window."
 			    (string-to-number
 			     (frame-parameter redirect 'outer-window-id)))))))
 	 (new-focus (or (not scim-frame-focus) focus-in)))
-    (when (eq focused-p new-focus)
-      (when (and new-focus
-		 (not scim-frame-focus)
-		 scim-config-last-modtime
-		 (time-less-p scim-config-last-modtime
-			      (scim-config-file-timestamp)))
-	(scim-log "SCIM's settings changed")
-	(scim-reset-imcontext-statuses))
+    (cond
+     ((not (eq focused-p new-focus)))
+     ((and new-focus
+	   (not scim-frame-focus)
+	   scim-config-last-modtime
+	   (time-less-p scim-config-last-modtime
+			(scim-config-file-timestamp)))
+      (scim-log "SCIM's settings changed")
+      (scim-mode-off)
+      (if (scim-mode-on)
+	  (progn
+	    (scim-message "scim-mode restarted")
+	    (scim-check-current-buffer))
+	(scim-message "Failed to restart")))
+     (t
       (setq scim-config-last-modtime (and (not new-focus)
 					  (scim-config-file-timestamp)))
       (when (and (stringp scim-imcontext-id)
@@ -1984,7 +1991,7 @@ i.e. input focus is in this window."
 	;; Set dummy event as a trigger of `post-command-hook'
 	(setq unread-command-events
 	      (cons 'scim-dummy-event
-		    (delq 'scim-dummy-event unread-command-events)))))))
+		    (delq 'scim-dummy-event unread-command-events))))))))
 
 (defun scim-cancel-focus-update-timer ()
   (when scim-focus-update-timer
