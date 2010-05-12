@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.22")
+(defconst scim-mode-version "0.8.0.23")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -659,8 +659,17 @@ value manually before scim-bridge.el is loaded.")
 (defvar scim-tmp-buffer-name " *scim-bridge*"
   "This is working buffer name used for communicating with the agent.")
 
+(defvar scim-incompatible-major-modes
+  '(ebrowse-tree-mode w3m-mode)
+  "List of symbols specifying major modes that keymaps of scim-mode are
+deactivated.")
+
+(make-obsolete-variable
+ 'scim-incompatible-mode-hooks 'scim-incompatible-major-modes
+ "scim-bridge.el version 0.8.1")
+
 (defvar scim-incompatible-mode-hooks
-  '(ebrowse-tree-mode-hook w3m-mode-hook)
+  nil
   "List of symbols specifying major mode hooks that `scim-mode-map' is
 deactivated when invoking these hooks.")
 
@@ -1475,6 +1484,10 @@ If STRING is empty or nil, the documentation string is left original."
   (if scim-mode
       (scim-switch-keymap nil))
   (setq scim-mode-map-disabled t))
+
+(defun scim-check-major-mode ()
+  (if (memq major-mode scim-incompatible-major-modes)
+      (scim-disable-keymap)))
 
 (defun scim-make-keymap-internal (keys &optional parent &rest ranges)
   (let ((map (if ranges (make-keymap) (make-sparse-keymap))))
@@ -3306,15 +3319,23 @@ i.e. input focus is in this window."
 	(scim-activate-advice-describe-key t)
 	(scim-setup-isearch)
 	;; Initialize key bindings
+	(mapc (lambda (buffer)
+		(with-current-buffer buffer
+		  (if (memq major-mode scim-incompatible-major-modes)
+		      (setq scim-mode-map-disabled t))))
+	      (buffer-list))
 	(scim-update-key-bindings)
 	(scim-set-mode-map-alist)
 	(add-to-ordered-list
 	 'emulation-mode-map-alists 'scim-mode-map-alist 50)
 	;; Setup hooks
 	(add-hook 'minibuffer-exit-hook 'scim-exit-minibuffer-function)
-	(mapc (lambda (hook)
-		(add-hook hook 'scim-disable-keymap))
-	      scim-incompatible-mode-hooks)
+	(add-hook 'after-change-major-mode-hook 'scim-check-major-mode)
+	(when scim-incompatible-mode-hooks
+	  (scim-message "`scim-incompatible-mode-hooks' is obsolete option. Use `scim-incompatible-major-modes' instead.")
+	  (mapc (lambda (hook)
+		  (add-hook hook 'scim-disable-keymap))
+		scim-incompatible-mode-hooks))
 	(add-hook 'ediff-startup-hook 'scim-check-current-buffer)
 	(add-hook 'post-command-hook 'scim-check-current-buffer)
 	(scim-log "post-command-hook: %s" post-command-hook)
@@ -3336,6 +3357,7 @@ i.e. input focus is in this window."
   (mapc (lambda (hook)
 	  (remove-hook hook 'scim-disable-keymap))
 	scim-incompatible-mode-hooks)
+  (remove-hook 'after-change-major-mode-hook 'scim-check-major-mode)
   (remove-hook 'minibuffer-exit-hook 'scim-exit-minibuffer-function)
   (setq emulation-mode-map-alists
 	(delq 'scim-mode-map-alist emulation-mode-map-alists))
