@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.23")
+(defconst scim-mode-version "0.8.0.24")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2167,14 +2167,12 @@ i.e. input focus is in this window."
 	  (overlay-put ol 'priority 0)
 	  (setq scim-preedit-overlays (list ol))
 	  (while attrs
-	    (let* ((beg (string-to-number (car attrs)))
-		   (end (string-to-number
-			 (car (setq attrs (cdr attrs)))))
-		   (type (car (setq attrs (cdr attrs))))
-		   (value (car (setq attrs (cdr attrs))))
+	    (let* ((beg (max (string-to-number (pop attrs)) 0))
+		   (end (min (string-to-number (pop attrs)) max))
+		   (type (pop attrs))
+		   (value (pop attrs))
 		   fc pr)
 ;	      (scim-log "beg: %d  end: %d  type: %s  val: %s" begin end type value)
-	      (setq attrs (cdr attrs))
 	      (if (cond ((and (string= type "foreground")
 			      (scim-check-rgb-color value))
 			 (setq fc (list :foreground value)
@@ -2190,8 +2188,7 @@ i.e. input focus is in this window."
 					  (+ scim-preedit-point end))))
 		    (overlay-put ol 'face fc)
 		    (overlay-put ol 'priority pr)
-		    (setq scim-preedit-overlays
-			  (cons ol scim-preedit-overlays))
+		    (push ol scim-preedit-overlays)
 		    (setq flat-attr (if (and (listp flat-attr)
 					     (eq beg 0) (eq end max))
 					(cons fc flat-attr)
