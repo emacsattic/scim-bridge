@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.24")
+(defconst scim-mode-version "0.8.0.25")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2167,7 +2167,7 @@ i.e. input focus is in this window."
 	  (overlay-put ol 'priority 0)
 	  (setq scim-preedit-overlays (list ol))
 	  (while attrs
-	    (let* ((beg (max (string-to-number (pop attrs)) 0))
+	    (let* ((beg (min (max (string-to-number (pop attrs)) 0) max))
 		   (end (min (string-to-number (pop attrs)) max))
 		   (type (pop attrs))
 		   (value (pop attrs))
@@ -2212,6 +2212,7 @@ i.e. input focus is in this window."
 		  (setq scim-cursor-type-saved
 			(or (and (local-variable-p 'cursor-type) cursor-type)
 			    1))) ; 1 means that global value has been used
+		(setq scim-preedit-curpos (min scim-preedit-curpos max))
 		(if scim-put-cursor-on-candidate
 		    (goto-char (+ scim-preedit-point scim-preedit-curpos)))
 		(scim-set-cursor-location))
