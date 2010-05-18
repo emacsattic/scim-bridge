@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.25")
+(defconst scim-mode-version "0.8.0.26")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1131,7 +1131,6 @@ use either \\[customize] or the function `scim-mode'."
 (defvar scim-preedit-prev-curpos 0)
 (defvar scim-preedit-attributes nil)
 (defvar scim-preedit-prev-attributes nil)
-(defvar scim-preedit-default-attr nil)
 (defvar scim-preedit-overlays nil)
 (defvar scim-committed-string "")
 (defvar scim-saved-frame-coordinates '(0 . 0))
@@ -2127,10 +2126,7 @@ i.e. input focus is in this window."
       (if scim-preediting-p
 	  (scim-remove-preedit)
 	(if (eq window-system 'x)
-	    (scim-frame-top-left-coordinates))
-	(unless scim-surrounding-text-modified
-	  (scim-log "cleanup base attribute")
-	  (setq scim-preedit-default-attr nil)))
+	    (scim-frame-top-left-coordinates)))
       ;; Put String
       (setq scim-preediting-p (current-buffer))
       (setq scim-keymap-overlay (make-overlay (point-min) (1+ (point-max)) nil nil t))
@@ -2162,7 +2158,7 @@ i.e. input focus is in this window."
 	(let* ((max (length str))
 	       (ol (make-overlay scim-preedit-point
 				 (+ scim-preedit-point max)))
-	       (flat-attr nil))
+	       highlight)
 	  (overlay-put ol 'face 'scim-preedit-default-face)
 	  (overlay-put ol 'priority 0)
 	  (setq scim-preedit-overlays (list ol))
@@ -2183,28 +2179,20 @@ i.e. input focus is in this window."
 			       pr 50))
 			((and (string= type "decoreate")
 			      (setq fc (scim-select-face-by-attr value)))
+			 (unless (eq fc 'scim-preedit-underline-face)
+			   (setq highlight t))
 			 (setq pr 100)))
 		  (let ((ol (make-overlay (+ scim-preedit-point beg)
 					  (+ scim-preedit-point end))))
 		    (overlay-put ol 'face fc)
 		    (overlay-put ol 'priority pr)
-		    (push ol scim-preedit-overlays)
-		    (setq flat-attr (if (and (listp flat-attr)
-					     (eq beg 0) (eq end max))
-					(cons fc flat-attr)
-				      t)))
+		    (push ol scim-preedit-overlays))
 		(scim-message "Unable to set attribute %S %S." type value))))
 	  ;; This modification hook must be registered as a global hook because
 	  ;; local hooks might be reset when major mode is changed.
 	  (add-hook 'before-change-functions 'scim-before-change-function)
-	  (setq flat-attr (or flat-attr
-			      'none)
-		scim-preedit-default-attr (or scim-preedit-default-attr
-					      flat-attr))
-	  (scim-log "default attr: %S" scim-preedit-default-attr)
-	  (scim-log "current attr: %S" flat-attr)
-	  (if (or (eq flat-attr t)
-		  (not (equal flat-attr scim-preedit-default-attr)))
+	  (scim-log "highlighted: %s" highlight)
+	  (if highlight
 	      ;; When conversion candidate is shown
 	      (progn
 		(unless (or (eq scim-cursor-type-for-candidate 0)
@@ -3279,7 +3267,6 @@ i.e. input focus is in this window."
 	scim-preediting-p nil
 	scim-last-rejected-event nil
 	scim-last-command nil
-	scim-preedit-default-attr nil
 	scim-config-last-modtime nil
 	scim-net-active-window-unsupported nil))
 
