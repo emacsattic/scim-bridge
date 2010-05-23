@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.27")
+(defconst scim-mode-version "0.8.0.28")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2551,7 +2551,7 @@ i.e. input focus is in this window."
 	(scim-bridge-send-receive "register_imcontext")
 	(while (and (not (stringp scim-imcontext-id))
 		    (< (float-time) time-limit))
-	  (sit-for 0.1)))
+	  (scim-bridge-receive)))
       (unless (stringp scim-imcontext-id)
 	(scim-mode-quit)
 	(error "Couldn't register imcontext. Turned off scim-mode."))
