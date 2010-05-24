@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.28")
+(defconst scim-mode-version "0.8.0.29")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -496,12 +496,12 @@ See `cursor-type'."
   :group 'scim-appearance)
 
 (defcustom scim-cursor-type-for-candidate
-  0
+  'bar
   "This option specifies the cursor shape which is applied when the
 preediting area shows conversion candidates. If an integer 0, this
 option is not active so that the cursor shape is not changed.
 See `cursor-type'."
-  :type '(choice (const :tag "default (0)" 0)
+  :type '(choice (const :tag "don't specify (0)" 0)
 		 (const :tag "use frame parameter" t)
 		 (const :tag "don't display" nil)
 		 (const :tag "filled box" box)
@@ -517,7 +517,7 @@ See `cursor-type'."
   :group 'scim-appearance)
 
 (defcustom scim-put-cursor-on-candidate
-  nil
+  t
   "When the preediting area shows conversion candidates, the cursor
 is put on the selected segment if this option is non-nil. Otherwise,
 the cursor is put to the tail of the preediting area."
