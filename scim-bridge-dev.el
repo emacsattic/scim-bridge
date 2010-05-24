@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.29")
+(defconst scim-mode-version "0.8.0.30")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -69,7 +69,7 @@
 ;;
 ;;
 ;; Note that this program requires GNU Emacs 22 or later, and
-;; doesn't work when Emacs is running on terminal emulator.
+;; works only when Emacs is running under X session.
 ;;
 
 ;;; History:
