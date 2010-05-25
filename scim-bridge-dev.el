@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.30")
+(defconst scim-mode-version "0.8.0.31")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -748,7 +748,7 @@ unconditionally inherited.")
   '(
     (hiragana-katakana . romaji)
     (zenkaku-hankaku . kanji)
-    (henkan . mode-switch)
+;    (henkan . mode-switch)
     ))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -818,7 +818,7 @@ unconditionally inherited.")
     (cancel . ?\xff69)
     (help . ?\xff6a)
     (break . ?\xff6b)
-    (mode-switch . ?\xff7e) ; This key cannot be recognized to Emacs.
+;    (mode-switch . ?\xff7e)
 ;    (num-lock . ?\xff7f)
     ;; *** Keypad ******************************************************
     (kp-space . ?\xff80)
