@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.31")
+(defconst scim-mode-version "0.8.0.32")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -480,7 +480,7 @@ Note that this option requires SCIM-Bridge version 0.4.13 or later."
 isearch-mode is active. If an integer 0, this option is not active so
 that the cursor shape is not changed.
 See `cursor-type'."
-  :type '(choice (const :tag "default (0)" 0)
+  :type '(choice (const :tag "don't specify (0)" 0)
 		 (const :tag "use frame parameter" t)
 		 (const :tag "don't display" nil)
 		 (const :tag "filled box" box)
