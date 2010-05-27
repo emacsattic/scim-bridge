@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.33")
+(defconst scim-mode-version "0.8.0.34")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2123,10 +2123,15 @@ i.e. input focus is in this window."
      ;; IMContext contains preedit string
      (resume
       (setq scim-preedit-update t))
-     ((not (and scim-preediting-p
-		(string= str scim-preedit-prev-string)
-		(= scim-preedit-curpos scim-preedit-prev-curpos)
-		(equal attrs scim-preedit-prev-attributes)))
+     ;; Change only cursor position
+     ((and scim-preediting-p
+	   (string= str scim-preedit-prev-string)
+	   (equal attrs scim-preedit-prev-attributes)
+	   (or (= scim-preedit-curpos scim-preedit-prev-curpos)
+	       (not (or (member "highlight" attrs)
+			(member "reverse" attrs)))))
+      (goto-char (+ scim-preedit-point scim-preedit-curpos)))
+     (t
       (if scim-preediting-p
 	  (scim-remove-preedit)
 	(if (eq window-system 'x)
