@@ -1,3 +1,29 @@
+	* Version0.8.1
+	* Added internal option `scim-incompatible-major-modes'
+	* Changed default values of 'scim-cursor-type-for-candidate' to 'bar
+	* Changed default values of 'scim-put-cursor-on-candidate' to t
+	* Changed to turn off scim-mode when failing to open socket or register
+	IMContext
+	* Changed process sentinel to show message when scim-mode restarted
+	* Changed so that scim-mode restarts if config file is changed by using
+	SCIM GUI setup utility
+	* Modified not to redraw preedit when changing only cursor position
+	* Fixed bug: Japanese kana character 'ろ' might not be input when using
+	kana typing method
+	* Fixed bug: post-command-hook doesn't work when passively receive signals
+	from SCIM-Bridge agent
+	* Fixed bug: 'scim-callback-queue' isn't cleared when errors occur during
+	executing callbacks
+	* Fixed bug: Using with yasnippet might cause infinite loop
+	* Fixed bug: 'scim-bridge-socket-alist' aren't cleared when turning off
+	scim-mode
+	* Fixed problem: scim-chewing engine returns incorrect text attribute which
+	 exceeds the end of preediting area
+	* Fixed problem: scim-skk engine returns incorrect text attribute and
+	cursor position when showing annotation
+	* Fixed bug: IMContext can't be registered if the other signals are
+	received after the request for creating IMContext
+	* Fixed bug: alt + henkan doesn't work
 2010-04-23  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.8.0
 	* Added files for building deb package

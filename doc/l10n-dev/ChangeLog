@@ -1,13 +1,19 @@
+	* Version0.8.1
+	* Added docstrings:
+		scim-incompatible-major-modes
+	* Modified custom-type:
+		scim-isearch-cursor-type
+		scim-cursor-type-for-candidate
 2010-04-23  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.8.0
-	* Added docstrings
+	* Added docstrings:
 		scim-bridge-x-display-substitute
 		scim-preedit-incompatible-commands
 		scim-inherit-im-functions
-	* Modified docstrings
+	* Modified docstrings:
 		scim-undo-by-committed-string
 		scim-incompatible-mode-hooks
-	* Deleted variables and functions
+	* Deleted variables and functions:
 		scim-adjust-window-y-position
 		scim-undo-command-list
 		scim-get-frame-extents
