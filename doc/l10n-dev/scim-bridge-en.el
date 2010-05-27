@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-en-version "0.8.0.2")
+(defconst scim-bridge-en-version "0.8.0.33")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -30,12 +30,17 @@
 ;; languages (CJK and many European languages) for POSIX-style
 ;; operating systems including Linux and BSD.
 
-;; scim-bridge.el is SCIM-Bridge client for GNU Emacs. It is,
-;; however, not part of official SCIM-Bridge.
+;; scim-bridge.el is a SCIM-Bridge client for Emacs. It allows
+;; users on-the-spot style input with SCIM. The input statuses are
+;; individually kept for each buffer, and prefix-keys such as C-x
+;; and C-c can be used even if SCIM is active. So you can input
+;; various languages fast and comfortably by using it.
 
 ;; This program changes the documentation strings of the variables
 ;; and functions defined in scim-bridge.el into the equivalents
 ;; which are written in English.
+
+;; This program is *not* a part of SCIM-Bridge.
 
 ;;
 ;; Installation:

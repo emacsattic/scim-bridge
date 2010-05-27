@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-ja-version "0.8.0.2")
+(defconst scim-bridge-ja-version "0.8.0.33")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -29,12 +29,17 @@
 ;; ヨーロッパ言語) をサポートする POSIX スタイルのオペレーティングシステム
 ;; (Linux や BSD) のためのインプットメソッド (IM) プラットフォームです。
 
-;; scim-brifge.el はEmacs のための SCIM-Bridge クライアントです。
-;; ただし、これは公式の SCIM-Bridge の一部ではありません。
+;; scim-brifge.el はEmacs のための SCIM-Bridge クライアントであり、 SCIM
+;; を 用いた on the spot スタイルの入力を可能とするものです。入力状態は
+;; 個々のバッファについて保持され、また SCIM がアクティブな状態でも C-x や
+;; C-c 等のプレフィックスキーを使うことができます。したがって、ユーザーは
+;; このプログラムを用いて様々な言語を速く、快適に入力することができます。
 
 ;; このプログラムをロードすることによって、 scim-bridge.el で定義される変数
 ;; および関数の説明文字列が日本語で書かれたものに差し替えられ、また日本語入力
 ;; のためのいくつかの便利なコマンドが使用できるようになります。
+
+;; このプログラムは SCIM-Bridge の一部ではありません。
 
 ;;
 ;; Installation:
