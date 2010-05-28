@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.34")
+(defconst scim-mode-version "0.8.0.35")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2971,7 +2971,6 @@ i.e. input focus is in this window."
 ;; Execute commands replied from agent
 (defun scim-exec-callback-1 (sexplist)
   (scim-log "buffer: %s" (current-buffer))
-  (scim-log "socket: %s" scim-bridge-socket)
   (scim-log "display: %s" scim-selected-display)
   (scim-log "imcontext-id: %s" scim-imcontext-id)
   (mapc (lambda (sexp)
