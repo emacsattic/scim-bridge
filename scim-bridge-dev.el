@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.35")
+(defconst scim-mode-version "0.8.0.36")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -3012,7 +3012,7 @@ i.e. input focus is in this window."
 (defun scim-parse-reply (cmdlist &optional passive)
   (let (rsexplist)
     (while cmdlist
-      (let* ((args (car cmdlist))
+      (let* ((args (pop cmdlist))
 	     (callback (cdr (assoc (car args) scim-reply-alist))))
 	(cond
 	 ((memq callback scim-ignored-signal-list)
@@ -3021,9 +3021,8 @@ i.e. input focus is in this window."
 	 (callback
 	  (setq rsexplist (cons (cons callback (cdr args)) rsexplist)))
 	 (t
-	  (scim-message "Unknown command received from agent: %S" (car args))
-	  ))
-	(setq cmdlist (cdr cmdlist))))
+	  (scim-message (mapconcat 'identity args " "))
+	  ))))
     (when rsexplist
       (scim-log "this-command: %s" this-command)
       (scim-log "last-command: %s" last-command)
