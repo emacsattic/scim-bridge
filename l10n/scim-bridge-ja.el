@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-ja-version "0.8.0.33")
+(defconst scim-bridge-ja-version "0.8.0.36")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -318,7 +318,7 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 ます。値が整数の 0 であると、このオプションは不活性となり、カーソル形状は変え
 られません。。
 `cursor-type' をご覧下さい。"
- '(choice (const :tag "標準（0）" 0)
+ '(choice (const :tag "指定しない（0）" 0)
 	  (const :tag "フレームのパラメータを使用" t)
 	  (const :tag "表示しない" nil)
 	  (const :tag "塗りつぶされた箱型" box)
@@ -338,7 +338,7 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 るカーソル形状を指定します。値が整数の 0 であると、このオプションは不活性と
 なり、カーソル形状は変えられません。
 `cursor-type' をご覧下さい。"
- '(choice (const :tag "標準（0）" 0)
+ '(choice (const :tag "指定しない（0）" 0)
 	  (const :tag "フレームのパラメータを使用" t)
 	  (const :tag "表示しない" nil)
 	  (const :tag "塗りつぶされた箱型" box)
@@ -461,6 +461,11 @@ SCIM がオフの時、あるいは入力フォーカスが他のアプリケー
 (scim-set-variable-doc
  'scim-tmp-buffer-name
  "エージェントと通信するためのワーキングバッファの名前です。")
+
+(scim-set-variable-doc
+ 'scim-incompatible-major-modes
+ "scim-mode のキーマップが無効化されるメジャーモードを指定するシンボルの
+リストです。")
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks

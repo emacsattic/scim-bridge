@@ -7,7 +7,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-zh-si-version "0.8.0.33")
+(defconst scim-bridge-zh-si-version "0.8.0.36")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -261,7 +261,7 @@
  "这个选项指定当 `isearch-mode' 激活时所应用的光标形状.
 如果是一个整数0, 这个选项不会被激活并使光标形状不会被改变.
 详细看 `光标类型'."
- '(choice (const :tag "默认 (0)" 0)
+ '(choice (const :tag "不指定 (0)" 0)
           (const :tag "使用框架参数" t)
           (const :tag "不显示" nil)
           (const :tag "填充方块" box)
@@ -280,7 +280,7 @@
  "这个选项指定预编辑窗口显示候选变换时应用的光标形状.
 如果是一个整数0, 这个选项不会被激活并使光标形状不会被改变.
 详细看 `光标类型'."
- '(choice (const :tag "默认 (0)" 0)
+ '(choice (const :tag "不指定 (0)" 0)
           (const :tag "使用框架参数" t)
           (const :tag "不显示" nil)
           (const :tag "填充方块" box)
@@ -387,6 +387,10 @@
 (scim-set-variable-doc
  'scim-tmp-buffer-name
  "这个是和正在代理进行通信的缓存名字.")
+
+(scim-set-variable-doc
+ 'scim-incompatible-major-modes
+ "指定让 scim-mode 按键失效的主模式符号列表.")
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks

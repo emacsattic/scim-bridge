@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-en-version "0.8.0.33")
+(defconst scim-bridge-en-version "0.8.0.36")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -265,7 +265,7 @@ Note that this option requires SCIM-Bridge version 0.4.13 or later."
 isearch-mode is active. If an integer 0, this option is not active so
 that the cursor shape is not changed.
 See `cursor-type'."
- '(choice (const :tag "default (0)" 0)
+ '(choice (const :tag "don't specify (0)" 0)
 	  (const :tag "use frame parameter" t)
 	  (const :tag "don't display" nil)
 	  (const :tag "filled box" box)
@@ -285,7 +285,7 @@ See `cursor-type'."
 preediting area shows conversion candidates. If an integer 0, this
 option is not active so that the cursor shape is not changed.
 See `cursor-type'."
- '(choice (const :tag "default (0)" 0)
+ '(choice (const :tag "don't specify (0)" 0)
 	  (const :tag "use frame parameter" t)
 	  (const :tag "don't display" nil)
 	  (const :tag "filled box" box)
@@ -410,6 +410,11 @@ value manually before scim-bridge.el is loaded.")
 (scim-set-variable-doc
  'scim-tmp-buffer-name
  "This is working buffer name used for communicating with the agent.")
+
+(scim-set-variable-doc
+ 'scim-incompatible-major-modes
+ "List of symbols specifying major modes that keymaps of scim-mode are
+deactivated.")
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks

@@ -7,7 +7,7 @@
 ;; Maintainer: TRANSLATOR
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-XX-version "0.8.0.33")
+(defconst scim-bridge-XX-version "0.8.0.36")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -264,7 +264,7 @@
  ;;that the cursor shape is not changed.
  ;;See `cursor-type'."
  ""
- ;; '(choice (const :tag "default (0)" 0)
+ ;; '(choice (const :tag "don't specify (0)" 0)
  ;;	  (const :tag "use frame parameter" t)
  ;;	  (const :tag "don't display" nil)
  ;;	  (const :tag "filled box" box)
@@ -286,7 +286,7 @@
  ;;option is not active so that the cursor shape is not changed.
  ;;See `cursor-type'."
  ""
- ;; '(choice (const :tag "default (0)" 0)
+ ;; '(choice (const :tag "don't specify (0)" 0)
  ;;	  (const :tag "use frame parameter" t)
  ;;	  (const :tag "don't display" nil)
  ;;	  (const :tag "filled box" box)
@@ -428,6 +428,12 @@
 (scim-set-variable-doc
  'scim-tmp-buffer-name
  ;; "This is working buffer name used for communicating with the agent."
+ "")
+
+(scim-set-variable-doc
+ 'scim-incompatible-major-modes
+ ;; "List of symbols specifying major modes that keymaps of scim-mode are
+ ;;deactivated."
  "")
 
 (scim-set-variable-doc
