@@ -22,6 +22,8 @@
 	 exceeds the end of preediting area
 	* Fixed problem: scim-skk engine returns incorrect text attribute and
 	cursor position when showing annotation
+	* Fixed problem: 'post-command-hook' is incorrectly set to nil when using
+	anything.el
 	* Fixed bug: IMContext can't be registered if the other signals are
 	received after the request for creating IMContext
 	* Fixed bug: alt + henkan doesn't work
