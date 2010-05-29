@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.39")
+(defconst scim-mode-version "0.8.0.40")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2383,6 +2383,26 @@ i.e. input focus is in this window."
   (if scim-imcontext-temporary-for-minibuffer
       (scim-deregister-imcontext)))
 
+;; Advices for `anything.el'
+
+(defadvice anything-read-pattern-maybe
+  (before scim-fix-hook-anything-read-pattern-maybe ())
+  (if scim-mode
+      (add-hook 'post-command-hook 'scim-check-current-buffer)))
+
+(defadvice anything-isearch-post-command
+  (before scim-fix-hook-anything-isearch-post-command ())
+  (if (and scim-mode
+	   (not (memq 'scim-check-current-buffer
+		      (default-value 'post-command-hook))))
+      (scim-check-current-buffer)))
+
+(defun scim-activate-advices-fix-post-command-hook (enable)
+  (if enable
+      (ad-enable-regexp "^scim-fix-hook-")
+    (ad-disable-regexp "^scim-fix-hook-"))
+  (ad-activate-regexp "^scim-fix-hook-"))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; INHERIT-INPUT-METHOD
 (defun scim-defadvice-inherit-imcontext ()
@@ -3309,6 +3329,7 @@ i.e. input focus is in this window."
 	      scim-selected-frame (selected-frame))
 	(scim-defadvice-disable-for-preedit)
 	(scim-activate-advices-disable-for-preedit t)
+	(scim-activate-advices-fix-post-command-hook t)
 	(scim-defadvice-inherit-imcontext)
 	(scim-activate-advices-inherit-im t)
 	(scim-activate-advice-describe-key t)
@@ -3358,6 +3379,7 @@ i.e. input focus is in this window."
 	(delq 'scim-mode-map-alist emulation-mode-map-alists))
   (scim-update-kana-ro-key t)
   (scim-activate-advices-disable-for-preedit nil)
+  (scim-activate-advices-fix-post-command-hook nil)
   (scim-activate-advices-inherit-im nil)
   (scim-activate-advice-describe-key nil)
   (scim-disable-isearch)
