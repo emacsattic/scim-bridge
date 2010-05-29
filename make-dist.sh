@@ -6,7 +6,7 @@ EL_DEV="scim-bridge-dev.el"
 EL_MAIN="scim-bridge.el"
 DBGREGEXP="^;*\t* *(scim-log\b"
 
-FILES=("README" "COPYING" "doc" "l10n" "debian")
+FILES=("README" "doc" "l10n" "debian")
 
 PACKAGE="scim-bridge-el"
 VERSION=$(sed -n 's/^(defconst scim-mode-version "\(.*\)")$/\1/p' $EL_DEV)
