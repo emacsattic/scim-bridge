@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.40")
+(defconst scim-mode-version "0.8.1")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -78,6 +78,16 @@
 ;;
 
 ;;; History:
+;; 2010-05-29  S. Irie
+;;         * Added internal option `scim-incompatible-major-modes'
+;;         * Changed default value of `scim-cursor-type-for-candidate'
+;;         * Changed default value of `scim-put-cursor-on-candidate'
+;;         * Changed to exit when failing to open socket or register IMContext
+;;         * Changed to restart when changing SCIM settings by setup utility
+;;         * Unimportant changes
+;;         * Bug fixes
+;;         * Version 0.8.1
+;;
 ;; 2010-04-23  S. Irie
 ;;         * Add files for building deb package
 ;;         * Add support for multi-display environment
