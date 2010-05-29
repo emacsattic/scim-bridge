@@ -1,6 +1,8 @@
 	* Version0.8.1
-	* Added docstrings:
+	* Added docstring:
 		scim-incompatible-major-modes
+	* Modified docstring:
+		scim-incompatible-mode-hooks
 	* Modified custom-type:
 		scim-isearch-cursor-type
 		scim-cursor-type-for-candidate
