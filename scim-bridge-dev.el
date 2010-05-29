@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.37")
+(defconst scim-mode-version "0.8.0.38")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2130,7 +2130,9 @@ i.e. input focus is in this window."
 	   (or (= scim-preedit-curpos scim-preedit-prev-curpos)
 	       (not (or (member "highlight" attrs)
 			(member "reverse" attrs)))))
-      (goto-char (+ scim-preedit-point scim-preedit-curpos)))
+      (unless (= scim-preedit-curpos scim-preedit-prev-curpos)
+	(goto-char (+ scim-preedit-point scim-preedit-curpos))
+	(setq scim-preedit-prev-curpos scim-preedit-curpos)))
      (t
       (if scim-preediting-p
 	  (scim-remove-preedit)
