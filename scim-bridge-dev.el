@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.0.36")
+(defconst scim-mode-version "0.8.0.37")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -675,8 +675,8 @@ deactivated.")
 
 (defvar scim-incompatible-mode-hooks
   nil
-  "List of symbols specifying major mode hooks that `scim-mode-map' is
-deactivated when invoking these hooks.")
+  "List of symbols specifying major mode hooks that keymaps of scim-mode
+are deactivated when invoking these hooks.")
 
 (define-obsolete-variable-alias
   'scim-undo-command-list 'scim-preedit-incompatible-commands

@@ -7,7 +7,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-zh-si-version "0.8.0.36")
+(defconst scim-bridge-zh-si-version "0.8.0.37")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -394,7 +394,7 @@
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks
- "指定让 `scim-mode-map' 失效的钩子列表.")
+ "指定让 scim-mode 按键失效的主模式钩子列表.")
 
 (scim-set-variable-doc
  'scim-preedit-incompatible-commands

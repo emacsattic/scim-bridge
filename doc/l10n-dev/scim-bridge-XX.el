@@ -7,7 +7,7 @@
 ;; Maintainer: TRANSLATOR
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-XX-version "0.8.0.36")
+(defconst scim-bridge-XX-version "0.8.0.37")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -438,8 +438,8 @@
 
 (scim-set-variable-doc
  'scim-incompatible-mode-hooks
- ;; "List of symbols specifying major mode hooks that `scim-mode-map' is
- ;;deactivated when invoking these hooks."
+ ;; "List of symbols specifying major mode hooks that keymaps of scim-mode
+ ;;are deactivated when invoking these hooks."
  "")
 
 (scim-set-variable-doc
