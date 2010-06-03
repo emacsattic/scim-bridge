@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1")
+(defconst scim-mode-version "0.8.1.1")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1261,14 +1261,6 @@ use either \\[customize] or the function `scim-mode'."
 	(round num)
       (round (- num 4294967296.0)))))
 
-(defun scim-null-command ()
-  (interactive)
-  (scim-log "dummy event")
-  (when (interactive-p)
-    (setq this-command last-command)
-    (setq unread-command-events
-	  (delq 'scim-dummy-event unread-command-events))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Localization
 (defun scim-set-group-doc (group string)
@@ -1594,7 +1586,6 @@ If STRING is empty or nil, the documentation string is left original."
     (unless (keymapp scim-mode-map)
       (setq scim-mode-map (make-sparse-keymap)))
     (define-key scim-mode-map [scim-receive-event] 'scim-exec-callback)
-    (define-key scim-mode-map [scim-dummy-event] 'scim-null-command)
     (scim-set-keymap-parent))
   (when (memq symbol '(nil scim-preedit-function-key-list))
     (scim-log "update scim-mode-preedit-map")
@@ -2012,12 +2003,8 @@ i.e. input focus is in this window."
 	(when scim-frame-focus
 	  (scim-frame-top-left-coordinates)
 	  (scim-set-window-x-offset)))
-      (unless (or focus-in
-		  (memq 'scim-receive-event unread-command-events))
-	;; Set dummy event as a trigger of `post-command-hook'
-	(setq unread-command-events
-	      (cons 'scim-dummy-event
-		    (delq 'scim-dummy-event unread-command-events))))))))
+      (unless focus-in
+	(scim-check-current-buffer))))))
 
 (defun scim-cancel-focus-update-timer ()
   (when scim-focus-update-timer
@@ -2545,8 +2532,7 @@ i.e. input focus is in this window."
 	  (erase-buffer)
 	  (scim-log "receive:\n%s" repl)
 	  (setq unread-command-events
-		(delq 'scim-receive-event
-		      (delq 'scim-dummy-event unread-command-events))))
+		(delq 'scim-receive-event unread-command-events)))
 	(if (string= repl "")
 	    (scim-message "Data reception became timeout.")
 	  (scim-parse-reply (scim-split-commands repl) passive))))))
@@ -3017,9 +3003,7 @@ i.e. input focus is in this window."
     (unless (eq last-command 'scim-handle-event)
       (setq scim-string-insertion-failed nil))
     (setq this-command last-command
-	  unread-command-events
-	  (delq 'scim-receive-event
-		(delq 'scim-dummy-event unread-command-events))))
+	  unread-command-events (delq 'scim-receive-event unread-command-events)))
   (when (buffer-live-p scim-current-buffer)
     (with-current-buffer scim-current-buffer
       (scim-log "callback queue: %s" (pp-to-string scim-callback-queue))
@@ -3069,8 +3053,7 @@ i.e. input focus is in this window."
 	      (setq scim-callback-queue queue1))
 	    (setq unread-command-events
 		  (cons 'scim-receive-event
-			(delq 'scim-receive-event
-			      (delq 'scim-dummy-event unread-command-events)))))
+			(delq 'scim-receive-event unread-command-events))))
 	(when (buffer-live-p scim-current-buffer)
 	  (with-current-buffer scim-current-buffer
 	    (scim-exec-callback-1 (nreverse rsexplist))
