@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.1")
+(defconst scim-mode-version "0.8.1.2")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1877,10 +1877,18 @@ the previous values of frame coordinates by referring the variable
 	 ;; when the header line is displayed (Emacs bug #4426).
 	 ;; In this case, `frame-char-height' is used substitutively,
 	 ;; but this function doesn't return actual character height.
-	 (char-height (or (and header-line-format
-			       (frame-char-height))
-			  (cdr (posn-object-width-height
-				(posn-at-x-y (max (car x-y) 0) (cadr x-y)))))))
+	 (char-height (cond
+		       ((null header-line-format)
+			(cdr (posn-object-width-height
+			      (posn-at-x-y (max (car x-y) 0) (cadr x-y)))))
+		       ((and (boundp 'text-scale-mode-amount)
+			     (not (zerop text-scale-mode-amount)))
+			(round (* (frame-char-height)
+				  (with-no-warnings
+				    (expt text-scale-mode-step
+					  text-scale-mode-amount)))))
+		       (t
+			(frame-char-height)))))
     (cons ax (+ ay char-height))))
 
 ;;; TODO: FIXME: Does anyone know how to get the actual character height
