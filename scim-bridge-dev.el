@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.2")
+(defconst scim-mode-version "0.8.1.3")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1722,14 +1722,13 @@ restart scim-mode so that this settings may become effective."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Control display
 (defun scim-get-x-display ()
-  ;; Don't use (frame-parameter nil 'display) because
-  ;; this expression returns nil if frame is on text-only terminal.
-  (let ((env (getenv "DISPLAY")))
+  (let ((env (or scim-bridge-x-display-substitute
+		 (frame-parameter nil 'display)
+		 (getenv "DISPLAY"))))
     (and env
-	 (or scim-bridge-x-display-substitute
-	     (let* ((display (substring env (string-match ":[0-9]+" env)))
-		    (screen (and (not (string-match "\\.[0-9]+$" display)) ".0")))
-	       (concat display screen))))))
+	 (let* ((display (substring env (string-match ":[0-9]+" env)))
+		(screen (and (not (string-match "\\.[0-9]+$" display)) ".0")))
+	   (concat display screen)))))
 
 (defun scim-set-cursor-color (&optional single-frame)
   (let ((color (cond
@@ -2275,8 +2274,9 @@ i.e. input focus is in this window."
       (let ((buffer (current-buffer))
 	    (visited-p scim-buffer-group)
 	    (non-x-p (not (eq window-system 'x)))
-	    (display-unchanged-p (equal (scim-get-x-display)
-					scim-selected-display)))
+	    (display-unchanged-p (or (eq (selected-frame) scim-selected-frame)
+				     (equal (scim-get-x-display)
+					    scim-selected-display))))
 	;; Switch IMContext between global and local
 	(unless (or non-x-p
 		    (not visited-p)
