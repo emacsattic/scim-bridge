@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.3")
+(defconst scim-mode-version "0.8.1.4")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2728,8 +2728,8 @@ i.e. input focus is in this window."
       ;; If key event is handled
       (when scim-last-command-event
 	;; Send cursor location for displaying SCIM-Ruby history window
-	(when (and (not scim-preedit-update)
-		   (string= scim-preedit-prev-string "")
+	(when (and (not scim-preediting-p)
+		   (not scim-preedit-update)
 		   (string= scim-preedit-string ""))
 	  (let ((scim-preedit-point (point))
 		(scim-adjust-window-x-offset 0))
