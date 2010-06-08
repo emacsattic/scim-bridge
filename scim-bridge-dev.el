@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.6")
+(defconst scim-mode-version "0.8.1.7")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1827,6 +1827,7 @@ If FRAME is omitted, use selected-frame.
 Users can also get the frame coordinates by referring the variable
 `scim-saved-frame-coordinates' just after calling this function."
   ;; Note: This function was imported from pos-tip.el ver. 0.0.3
+  (scim-log "get frame coordinates")
   (with-current-buffer (get-buffer-create " *xwininfo*")
     (let ((case-fold-search nil))
       (buffer-disable-undo)
@@ -2376,8 +2377,11 @@ i.e. input focus is in this window."
 	  (kill-local-variable 'scim-cursor-type-saved))))
       ;; Check selected frame
       (unless (eq (selected-frame) scim-selected-frame)
-	(if (eq window-system 'x)
-	    (scim-frame-top-left-coordinates))
+	(when (and scim-preediting-p
+		   (eq window-system 'x))
+	  (scim-frame-top-left-coordinates)
+	  (scim-remove-preedit)
+	  (scim-show-preedit))
 	(setq scim-selected-frame (selected-frame))
 	(scim-update-cursor-color)))
     (scim-start-focus-observation)))
