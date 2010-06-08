@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.5")
+(defconst scim-mode-version "0.8.1.6")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1843,8 +1843,7 @@ Users can also get the frame coordinates by referring the variable
 					    (search-forward "Y: ")
 					    (line-end-position)))))))))
 
-(defun scim-compute-pixel-position
-  (&optional pos window frame-coordinates)
+(defun scim-compute-pixel-position (&optional pos window frame-coordinates)
   "Return the absolute pixel coordinates of POS in WINDOW as a cons cell
 like (X . Y), showing the location of bottom left corner of the character.
 
