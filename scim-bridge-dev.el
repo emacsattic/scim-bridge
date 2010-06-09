@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.8")
+(defconst scim-mode-version "0.8.1.9")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1108,6 +1108,7 @@ use either \\[customize] or the function `scim-mode'."
 (defvar scim-config-last-modtime nil)
 (defvar scim-last-rejected-event nil)
 (defvar scim-last-command nil)
+(defvar scim-cursor-prev-location nil)
 
 ;; IMContexts
 (defvar scim-buffer-group nil)
@@ -1836,7 +1837,8 @@ Users can also get the frame coordinates by referring the variable
 		    (concat "xwininfo -id " (frame-parameter frame 'window-id)))
       (goto-char (point-min))
       (search-forward "\n  Absolute")
-      (setq scim-saved-frame-coordinates
+      (setq scim-cursor-prev-location nil
+	    scim-saved-frame-coordinates
 	    (cons (progn (string-to-number (buffer-substring-no-properties
 					    (search-forward "X: ")
 					    (line-end-position))))
@@ -2655,12 +2657,14 @@ i.e. input focus is in this window."
   (let* ((pixpos (scim-compute-pixel-position
 		  (+ scim-preedit-point scim-preedit-curpos) nil
 		  scim-saved-frame-coordinates))
-	 (x (number-to-string
-	     (max (- (car pixpos) scim-adjust-window-x-offset) 1)))
-	 (y (number-to-string (cdr pixpos))))
-    (scim-log "cursor position: (%s, %s)" x y)
-    (scim-bridge-send-only
-     (concat "set_cursor_location " scim-imcontext-id " " x " " y))))
+	 (x-y (format "%d %d"
+		      (max (- (car pixpos) scim-adjust-window-x-offset) 1)
+		      (cdr pixpos))))
+    (scim-log "cursor position (x y): %s" x-y)
+    (unless (equal x-y scim-cursor-prev-location)
+      (setq scim-cursor-prev-location x-y)
+      (scim-bridge-send-only
+       (concat "set_cursor_location " scim-imcontext-id " " x-y)))))
 
 (defun scim-handle-key-event (key-code key-pressed modifiers) ;(id key-code key-pressed &rest modifiers)
   (scim-bridge-send-receive
