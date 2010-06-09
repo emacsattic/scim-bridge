@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.7")
+(defconst scim-mode-version "0.8.1.8")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -3307,6 +3307,7 @@ i.e. input focus is in this window."
 	scim-net-active-window-unsupported nil))
 
 (defun scim-mode-on ()
+  "Turn scim-mode on."
   (interactive)
   (if (not (or (eq window-system 'x) ; X frame
 	       (getenv "DISPLAY")))  ; non-X frame under X session
@@ -3403,6 +3404,7 @@ i.e. input focus is in this window."
   scim-mode)
 
 (defun scim-mode-off ()
+  "Turn scim-mode off."
   (interactive)
   (when (and (stringp scim-imcontext-id)
 	     scim-frame-focus)
