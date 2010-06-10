@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.10")
+(defconst scim-mode-version "0.8.1.11")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2651,13 +2651,15 @@ i.e. input focus is in this window."
 (defun scim-set-cursor-location (&optional prediction) ;(id x y)
   (let* ((pixpos (scim-compute-pixel-position
 		  (if (and prediction
-			   (car scim-prediction-window-position))
+			   (car scim-prediction-window-position)
+			   (not (minibufferp)))
 		      scim-preedit-point
 		    (+ scim-preedit-point scim-preedit-curpos))
 		  nil scim-saved-frame-coordinates))
 	 (x-y (format "%d %d"
-		      (if (and prediction
-			       (null (cdr scim-prediction-window-position)))
+		      (if (or (and prediction
+				   (null (cdr scim-prediction-window-position)))
+			      (minibufferp))
 			  (car pixpos)
 			(max (- (car pixpos) scim-adjust-window-x-offset) 1))
 		      (cdr pixpos))))
