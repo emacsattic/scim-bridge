@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.9")
+(defconst scim-mode-version "0.8.1.10")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2140,7 +2140,7 @@ i.e. input focus is in this window."
 			(member "reverse" attrs)))))
       (unless (= scim-preedit-curpos scim-preedit-prev-curpos)
 	(goto-char (+ scim-preedit-point scim-preedit-curpos))
-	(scim-set-cursor-location)
+	(scim-set-cursor-location t)
 	(setq scim-preedit-prev-curpos scim-preedit-curpos)))
      (t
       (if scim-preediting-p
@@ -2226,12 +2226,7 @@ i.e. input focus is in this window."
 		(scim-set-cursor-location))
 	    ;; When the string is preedited or prediction window is shown
 	    (goto-char (+ scim-preedit-point scim-preedit-curpos))
-	    (if (car scim-prediction-window-position)
-		(setq scim-preedit-curpos 0))
-	    (if (cdr scim-prediction-window-position)
-		(scim-set-cursor-location)
-	      (let ((scim-adjust-window-x-offset 0))
-		(scim-set-cursor-location)))))
+	    (scim-set-cursor-location t)))
 	(run-hooks 'scim-preedit-show-hook))
       ))))
 
@@ -2653,12 +2648,18 @@ i.e. input focus is in this window."
 	   (if focus-in " true" " false"))))
 ;  ) ; Debug code
 
-(defun scim-set-cursor-location () ;(id x y)
+(defun scim-set-cursor-location (&optional prediction) ;(id x y)
   (let* ((pixpos (scim-compute-pixel-position
-		  (+ scim-preedit-point scim-preedit-curpos) nil
-		  scim-saved-frame-coordinates))
+		  (if (and prediction
+			   (car scim-prediction-window-position))
+		      scim-preedit-point
+		    (+ scim-preedit-point scim-preedit-curpos))
+		  nil scim-saved-frame-coordinates))
 	 (x-y (format "%d %d"
-		      (max (- (car pixpos) scim-adjust-window-x-offset) 1)
+		      (if (and prediction
+			       (null (cdr scim-prediction-window-position)))
+			  (car pixpos)
+			(max (- (car pixpos) scim-adjust-window-x-offset) 1))
 		      (cdr pixpos))))
     (scim-log "cursor position (x y): %s" x-y)
     (unless (equal x-y scim-cursor-prev-location)
