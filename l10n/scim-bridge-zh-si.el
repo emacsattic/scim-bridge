@@ -7,7 +7,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-zh-si-version "0.8.1")
+(defconst scim-bridge-zh-si-version "0.8.1.12")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -437,8 +437,16 @@
  "使SCIM不可以和 `isearch-mode' 使用.")
 
 (scim-set-function-doc
+ 'scim-mode-on
+ "开启 `scim-mode'.")
+
+(scim-set-function-doc
+ 'scim-mode-off
+ "关闭 `scim-mode'.")
+
+(scim-set-function-doc
  'scim-mode
- "切换SCIM主模式 (scim-mode).
+ "切换SCIM次模式 (scim-mode).
 如果可选参数 ARG 是正数, 开启 `scim-mode',
 否则, 关闭它.")
 

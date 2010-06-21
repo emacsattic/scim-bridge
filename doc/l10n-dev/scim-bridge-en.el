@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-en-version "0.8.1")
+(defconst scim-bridge-en-version "0.8.1.12")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -464,6 +464,14 @@ restart scim-mode so that this settings may become effective.")
 (scim-set-function-doc
  'scim-disable-isearch
  "Make SCIM not usable with isearch-mode.")
+
+(scim-set-function-doc
+ 'scim-mode-on
+ "Turn scim-mode on.")
+
+(scim-set-function-doc
+ 'scim-mode-off
+ "Turn scim-mode off.")
 
 (scim-set-function-doc
  'scim-mode

@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-ja-version "0.8.1")
+(defconst scim-bridge-ja-version "0.8.1.12")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -514,6 +514,14 @@ KEY が配列として与えられた場合は、キーシーケンスを表す�
 (scim-set-function-doc
  'scim-disable-isearch
  "SCIM を isearch-mode で使用できないようにします。")
+
+(scim-set-function-doc
+ 'scim-mode-on
+ "scim-mode をオンにします。")
+
+(scim-set-function-doc
+ 'scim-mode-off
+ "scim-mode をオフにします。")
 
 (scim-set-function-doc
  'scim-mode
