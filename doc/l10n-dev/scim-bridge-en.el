@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-en-version "0.8.1.12")
+(defconst scim-bridge-en-version "0.8.1.13")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -426,7 +426,6 @@ deactivated.")
 are deactivated when invoking these hooks.")
 
 (scim-set-variable-doc
- 'scim-undo-command-list
  'scim-preedit-incompatible-commands
  "List of symbols specifying commands which are disabled when preediting.")
 
