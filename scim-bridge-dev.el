@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.11")
+(defconst scim-mode-version "0.8.1.14")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2006,7 +2006,7 @@ i.e. input focus is in this window."
 	    (setq scim-keyboard-layout (scim-get-keyboard-layout)))
 	(when (and scim-use-kana-ro-key
 		   scim-kana-ro-x-keysym)
-	  (scim-update-kana-ro-key nil t))
+	  (scim-update-kana-ro-key nil (not focus-in)))
 	(scim-set-keymap-parent)
 	(scim-change-focus scim-frame-focus) ; Send
 	(unless scim-preediting-p
