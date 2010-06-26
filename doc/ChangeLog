@@ -1,3 +1,18 @@
+	* Version0.8.2
+	* Changed not to send cursor location to agent if it doesn't move
+	* Changed to show prediction window at cursor position irrespective of
+	`scim-prediction-window-position' when using in minibuffer
+	* Changed not to use unnecessary event `scim-dummy-event'
+	* Modified to redraw preedit text when switching frames showing same buffer
+	* Fixed bug: Candidate window is shown at incorrect position when using
+	text-scale-mode with header line shown
+	* Fixed bug: Prediction window might be shown in incorrect position when
+	`scim-prediction-window-position' isn't default value
+	* Fixed bug: post-command-hook becomes extremely slow when using many frames
+	* Fixed bug: X keymap might be changed incorrectly when
+	`scim-use-kana-ro-key' is non-nil
+	* Fixed bug: Keymaps are not enabled for about 1 second maximum after
+	focused in from the other applications
 2010-05-29  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.8.1
 	* Added internal option `scim-incompatible-major-modes'

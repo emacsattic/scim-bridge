@@ -1,3 +1,7 @@
+	* Version0.8.2
+	* Added docstrings:
+		scim-mode-on
+		scim-mode-off
 2010-05-29  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.8.1
 	* Added docstring:
