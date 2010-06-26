@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.14")
+(defconst scim-mode-version "0.8.1.15")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1416,7 +1416,7 @@ If STRING is empty or nil, the documentation string is left original."
 (defun scim-set-keymap-parent ()
   (set-keymap-parent scim-mode-map
 		     (cond
-		      ((or (not scim-frame-focus)
+		      ((or (not (eq window-system 'x))
 			   scim-mode-map-prev-disabled)
 		       (scim-log "use empty keymap")
 		       nil)
