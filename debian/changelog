@@ -1,3 +1,9 @@
+scim-bridge-el (0.8.2) lucid; urgency=low
+
+  * New release
+
+ -- IRIE Shinsuke <irieshinsuke@yahoo.co.jp>  Sat, 26 Jun 2010 21:43:57 +0900
+
 scim-bridge-el (0.8.1) lucid; urgency=low
 
   * New release

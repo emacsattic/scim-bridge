@@ -1,3 +1,4 @@
+2010-06-26  IRIE Shinsuke <irieshinsuke@yahoo.co.jp>
 	* Version0.8.2
 	* Changed not to send cursor location to agent if it doesn't move
 	* Changed to show prediction window at cursor position irrespective of

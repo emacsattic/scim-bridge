@@ -7,7 +7,7 @@
 ;; Maintainer: TRANSLATOR
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-XX-version "0.8.1.12")
+(defconst scim-bridge-XX-version "0.8.2")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -83,7 +83,7 @@
 ;; History:
 ;; YEAR-MM-DD  TRANSLATOR
 ;;         * Initial release
-;;         * Version 0.8.1
+;;         * Version 0.8.2
 
 ;; ToDo:
 

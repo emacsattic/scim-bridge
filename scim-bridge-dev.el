@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.1.15")
+(defconst scim-mode-version "0.8.2")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -78,6 +78,13 @@
 ;;
 
 ;;; History:
+;; 2010-06-26  S. Irie
+;;         * Changed to reduce inter-process communication
+;;         * Changed to show prediction window at cursor position in minibuffer
+;;         * Modified to redraw preedit when switching frames showing same buffer
+;;         * Bug fixes
+;;         * Version 0.8.2
+;;
 ;; 2010-05-29  S. Irie
 ;;         * Added internal option `scim-incompatible-major-modes'
 ;;         * Changed default value of `scim-cursor-type-for-candidate'
