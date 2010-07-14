@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2")
+(defconst scim-mode-version "0.8.2.1")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -672,12 +672,6 @@ If you set this variable, the value must be a string such as \":0.0\".")
   "The name of SCIM's configuration file, which is used to detect
 the change of SCIM settings.")
 
-(defvar scim-meta-key-exists
-  (string< "" (shell-command-to-string "xmodmap -pke | grep '= Meta'"))
-  "t is set in this variable if there is mata modifier key in the
-keyboard. When automatic detection doesn't go well, please set the
-value manually before scim-bridge.el is loaded.")
-
 (defvar scim-tmp-buffer-name " *scim-bridge*"
   "This is working buffer name used for communicating with the agent.")
 
@@ -743,28 +737,30 @@ unconditionally inherited.")
     scim-imcontext-deregister
     scim-imcontext-reseted))
 
-(defvar scim-modifier-alist
-  `(
-    ;; Keyboard
-    (shift . "shift")
-    (control . "control")
-    (,(if scim-meta-key-exists 'alt 'meta) . "alt")
-    (meta . "meta")
-;    (super . "hyper")
-    (super . "super")
-    (hyper . "hyper")
-    ;;
-    (caps-lock . "caps_lock")
-    (num-lock . "num_lock")
-    (kana-RO . "kana_ro")
-    ;; Mouse
-;    (up . "up")
-;    (down . "down")
-;    (drag . "drag")
-;    (click . "click")
-;    (double . "double")
-;    (triple . "triple")
-    ))
+(defvar scim-modifier-alists
+  '((
+     (shift . "shift")
+     (control . "control")
+     (alt . "alt")
+     (meta . "meta")
+     (super . "super")
+     (hyper . "hyper")
+     ;;
+     (caps-lock . "caps_lock")
+     (num-lock . "num_lock")
+     (kana-RO . "kana_ro")
+     )
+    (
+     (shift . "shift")
+     (control . "control")
+     (meta . "alt")
+     (super . "super")
+     (hyper . "hyper")
+     ;;
+     (caps-lock . "caps_lock")
+     (num-lock . "num_lock")
+     (kana-RO . "kana_ro")
+     )))
 
 (defvar scim-alt-modifier-alist
   '(
@@ -1085,6 +1081,8 @@ use either \\[customize] or the function `scim-mode'."
 (defvar scim-preedit-show-hook nil)
 
 ;; Manage key bindings
+(defvar scim-meta-key-exist-p nil)
+(defvar scim-modifier-alist nil)
 (defvar scim-mode-map nil)
 (defvar scim-mode-preedit-map nil)
 (defvar scim-mode-common-map nil)
@@ -1225,10 +1223,10 @@ use either \\[customize] or the function `scim-mode'."
 		 (>= key-code ?a)
 		 (<= key-code ?z))
 	    (setq key-code (- key-code 32)))
-      (if (member "alt" modifiers)
-	  (setq key-code
-		(or (cdr (assq key-code scim-alt-modifier-alist))
-		    key-code)))
+      (if (and (member "alt" modifiers)
+	       (not scim-meta-key-exist-p))
+	  (setq key-code (or (cdr (assq key-code scim-alt-modifier-alist))
+			     key-code)))
       (if (and scim-use-kana-ro-key
 	       scim-kana-ro-key-symbol
 	       (eq key-code scim-kana-ro-key-symbol))
@@ -1244,7 +1242,8 @@ use either \\[customize] or the function `scim-mode'."
   (let ((bas (or (car (rassq key-code scim-keycode-alist))
 		 (if (< key-code 128) key-code)))
 	(mods nil))
-    (if (member "alt" modifiers)
+    (if (and (member "alt" modifiers)
+	     (not scim-meta-key-exist-p))
 	(setq bas (or (car (rassq bas scim-alt-modifier-alist))
 		      bas)))
     (while modifiers
@@ -1435,6 +1434,19 @@ If STRING is empty or nil, the documentation string is left original."
 		       (scim-log "use minimum keymap")
 		       scim-mode-minimum-map))))
 
+(defun scim-update-meta-key-exist-p ()
+  "Return t if there is mata modifier key on the keyboard of currently selected
+display."
+  (setq scim-meta-key-exist-p
+	(string< "" (shell-command-to-string "xmodmap -pke | grep '= Meta'"))))
+
+(defun scim-set-modifier-alist ()
+  (setq scim-modifier-alist (if (if (boundp 'scim-meta-key-exists)
+				    scim-meta-key-exists
+				  scim-meta-key-exist-p)
+				(car scim-modifier-alists)
+			      (cadr scim-modifier-alists))))
+
 (defun scim-enable-kana-ro-key (&optional keysym)
   (unless keysym (setq keysym scim-kana-ro-x-keysym))
   (when keysym
@@ -1519,11 +1531,11 @@ If STRING is empty or nil, the documentation string is left original."
 	     (mods (cdr key)))
 	(if (stringp bas)
 	    (setq bas (string-to-char bas)))
-	(when (memq 'alt mods)
-	  (unless scim-meta-key-exists
-	    (setq mods (cons 'meta (delq 'alt mods))))
+	(when (and (memq 'alt mods)
+		   (not scim-meta-key-exist-p))
 	  (setq bas (or (car (rassq bas scim-alt-modifier-alist))
-			bas)))
+			bas)
+		mods (cons 'meta (delq 'alt mods))))
 	(define-key map (vector (nconc mods (list bas))) 'scim-handle-event)
 	(setq keys (cdr keys))))
     map))
@@ -1574,6 +1586,8 @@ If STRING is empty or nil, the documentation string is left original."
     (when (memq symbol '(nil scim-kana-ro-x-keysym))
       (scim-update-kana-ro-key t))
     (scim-update-kana-ro-key))
+  (scim-update-meta-key-exist-p)
+  (scim-set-modifier-alist)
   (when (null symbol)
     (scim-log "update scim-mode-minimum-map")
     (if (keymapp scim-mode-minimum-map)
@@ -1963,7 +1977,8 @@ i.e. input focus is in this window."
 					       scim-bridge-socket-alist)
 		scim-selected-display display)
 	(scim-mode-quit)
-	(error "Unable to open socket for display %S. Turned off scim-mode." display)))))
+	(error "Unable to open socket for display %S. Turned off scim-mode." display)))
+    (scim-update-key-bindings)))
 
 (defun scim-config-file-timestamp ()
   (nth 5 (file-attributes scim-config-file)))
