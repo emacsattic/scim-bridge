@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.1")
+(defconst scim-mode-version "0.8.2.2")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2290,6 +2290,9 @@ i.e. input focus is in this window."
 ;  (scim-log "check current buffer")
   (catch 'exit
     (scim-cancel-focus-update-timer)
+    (unless scim-mode
+      (remove-hook 'post-command-hook 'scim-check-current-buffer)
+      (throw 'exit nil))
     (setq scim-last-rejected-event nil)
     (with-current-buffer (window-buffer)
       (let ((buffer (current-buffer))
@@ -3151,8 +3154,9 @@ i.e. input focus is in this window."
 	;; IMContext is not registered or key event is not recognized
 	(scim-key-event-handled "false"))))
   ;; Repair post-command-hook
-  (unless (memq 'scim-fallback-pre-function
-		(default-value 'pre-command-hook))
+  (when (and scim-mode
+	     (not (memq 'scim-fallback-pre-function
+			(default-value 'pre-command-hook))))
     (when (and (local-variable-p 'post-command-hook)
 	       (not (memq t post-command-hook)))
       (if post-command-hook
