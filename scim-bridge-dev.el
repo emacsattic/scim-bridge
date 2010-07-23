@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.2")
+(defconst scim-mode-version "0.8.2.3")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1905,8 +1905,9 @@ the previous values of frame coordinates by referring the variable
 		      ((null header-line-format)
 		       (cdr (posn-object-width-height
 			     (posn-at-x-y (max (car x-y) 0) (cadr x-y) window))))
-		      ((and (boundp 'text-scale-mode-amount)
-			    (not (zerop text-scale-mode-amount)))
+		      ((and (bound-and-true-p text-scale-mode)
+			    (not (zerop (with-no-warnings
+					  text-scale-mode-amount))))
 		       (round (* (frame-char-height frame)
 				 (with-no-warnings
 				   (expt text-scale-mode-step
