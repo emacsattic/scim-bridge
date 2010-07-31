@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.3")
+(defconst scim-mode-version "0.8.2.4")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1883,41 +1883,44 @@ This option makes the calculations slightly faster, but can be used only
 when it's clear that frame is in the specified position. Users can get
 the previous values of frame coordinates by referring the variable
 `scim-saved-frame-coordinates'."
-  (unless window
-    (setq window (selected-window)))
-  (let ((frame (window-frame window)))
+  (let ((frame (window-frame (or window (selected-window)))))
     (unless frame-coordinates
       (scim-frame-top-left-coordinates frame))
-    (let* ((x-y (or (pos-visible-in-window-p (or pos (window-point window)) window t)
-		    '(0 0)))
+    (let* ((posn (posn-at-point (or pos (window-point window)) window))
+	   (line (cdr (posn-actual-col-row posn)))
+	   (line-height (and line
+			     (or (window-line-height line window)
+				 (and (redisplay t)
+				      (window-line-height line window)))))
+	   (x-y (or (posn-x-y posn)
+		    (let ((geom (pos-visible-in-window-p
+				 (or pos (window-point window)) window t)))
+		      (and geom (cons (car geom) (cadr geom))))
+		    '(0 . 0)))
 	   (ax (+ (car scim-saved-frame-coordinates)
 		  (car (window-inside-pixel-edges window))
 		  (car x-y)))
 	   (ay (+ (cdr scim-saved-frame-coordinates)
 		  (cadr (window-pixel-edges window))
-		  (cadr x-y)))
-	   ;; `posn-object-width-height' returns an incorrect value
-	   ;; when the header line is displayed (Emacs bug #4426).
-	   ;; In this case, `frame-char-height' is used substitutively,
-	   ;; but this function doesn't return actual character height.
-	   (height (with-current-buffer (window-buffer window)
-		     (cond
-		      ((null header-line-format)
-		       (cdr (posn-object-width-height
-			     (posn-at-x-y (max (car x-y) 0) (cadr x-y) window))))
-		      ((and (bound-and-true-p text-scale-mode)
-			    (not (zerop (with-no-warnings
-					  text-scale-mode-amount))))
-		       (round (* (frame-char-height frame)
-				 (with-no-warnings
-				   (expt text-scale-mode-step
-					 text-scale-mode-amount)))))
-		      (t
-		       (frame-char-height frame))))))
+		  (or (nth 2 line-height) (cdr x-y))))
+	   (height (or (car line-height)
+		       (with-current-buffer (window-buffer window)
+			 (cond
+			  ;; `posn-object-width-height' returns an incorrect value
+			  ;; when the header line is displayed (Emacs bug #4426).
+			  ((and posn
+				(null header-line-format))
+			   (cdr (posn-object-width-height posn)))
+			  ((and (bound-and-true-p text-scale-mode)
+				(not (zerop (with-no-warnings
+					      text-scale-mode-amount))))
+			   (round (* (frame-char-height frame)
+				     (with-no-warnings
+				       (expt text-scale-mode-step
+					     text-scale-mode-amount)))))
+			  (t
+			   (frame-char-height frame)))))))
       (cons ax (+ ay height)))))
-
-;;; TODO: FIXME: Does anyone know how to get the actual character height
-;;;              even if the header line is displayed?
 
 (defun scim-get-gnome-font-size ()
   "Return the pixel size of application font in the GNOME desktop
