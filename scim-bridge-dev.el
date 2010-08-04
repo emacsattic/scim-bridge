@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.5")
+(defconst scim-mode-version "0.8.2.6")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -638,7 +638,7 @@ the milliseconds."
   :type 'number
   :group 'scim-expert)
 
-(defcustom scim-start-scim-bridge t
+(defcustom scim-start-scim-bridge nil
   "Specify what to do for SCIM-Bridge daemon not running.
 The value nil means do nothing, so scim-mode will stop immediately.
 If the value is a function, start the daemon automatically if the
