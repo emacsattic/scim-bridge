@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.4")
+(defconst scim-mode-version "0.8.2.5")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -636,6 +636,19 @@ to distinguish it from yen-mark key."
 A floating point number means the number of seconds, otherwise an integer
 the milliseconds."
   :type 'number
+  :group 'scim-expert)
+
+(defcustom scim-start-scim-bridge t
+  "Specify what to do for SCIM-Bridge daemon not running.
+The value nil means do nothing, so scim-mode will stop immediately.
+If the value is a function, start the daemon automatically if the
+function returns non-nil and the daemon is not running. The other
+non-nil value means start the daemon unconditionally."
+  :type '(choice (const :tag "Do nothing (nil)" nil)
+		 (const :tag "Start SCIM-Bridge (t)" t)
+		 (function :tag "According to function"
+			   (lambda ()
+			     (equal (getenv "GTK_IM_MODULE") "scim-bridge"))))
   :group 'scim-expert)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -2506,9 +2519,12 @@ i.e. input focus is in this window."
 				  t nil scim-tmp-buffer-name)))
 	 (i 0)
 	 proc error)
-    (unless (file-exists-p socket)
-      (scim-message "Launch SCIM-Bridge..."))
-    (call-process-shell-command scim-bridge-name nil 0 nil "--noexit")
+    (when (if (functionp scim-start-scim-bridge)
+	      (funcall scim-start-scim-bridge)
+	    scim-start-scim-bridge)
+      (unless (file-exists-p socket)
+	(scim-message "Launch SCIM-Bridge..."))
+      (call-process-shell-command scim-bridge-name nil 0 nil "--noexit"))
     (while (and (not (processp proc))
 		(< i 10)) ; Try connection 10 times at maximum
       (sleep-for (* 0.1 i))
