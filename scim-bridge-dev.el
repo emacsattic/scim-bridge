@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.6")
+(defconst scim-mode-version "0.8.2.7")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -3233,7 +3233,8 @@ i.e. input focus is in this window."
   (let ((overriding-terminal-local-map nil)
 	(prompt (isearch-message-prefix))
 	(minibuffer-local-map (with-no-warnings isearch-minibuffer-local-map))
-	(current-input-method nil)
+	(current-input-method (unless (equal current-input-method "SCIM")
+				current-input-method))
 	(scim-imcontext-temporary-for-minibuffer nil)
 	(scim-isearch-minibuffer nil)
 	(scim-current-buffer nil)
@@ -3272,7 +3273,8 @@ i.e. input focus is in this window."
 ;; Advices for `isearch.el'
 (defadvice isearch-printing-char
   (around scim-isearch-printing-char ())
-  (if scim-imcontext-status
+  (if (and scim-imcontext-status
+	   (null current-input-method))
       (let ((current-input-method "SCIM"))
 	ad-do-it)
     ad-do-it))
@@ -3292,9 +3294,13 @@ i.e. input focus is in this window."
   (if (and scim-imcontext-status
 	   (not nonincremental)
 	   (not (eq this-command 'isearch-edit-string)))
-      (let ((current-input-method "SCIM")
-	    (current-input-method-title "SCIM"))
-	ad-do-it)
+      (if current-input-method-title
+	  (let ((current-input-method-title
+		 (format "%s SCIM" current-input-method-title)))
+	    ad-do-it)
+	(let ((current-input-method "SCIM")
+	      (current-input-method-title "SCIM"))
+	  ad-do-it))
     ad-do-it))
 
 ;; Advices for `isearch-x.el'
@@ -3312,9 +3318,15 @@ i.e. input focus is in this window."
 
 (defadvice isearch-process-search-multibyte-characters
   (around scim-isearch-process-search-characters ())
-  (if (and (string= current-input-method "SCIM")
+  (if (and scim-mode
 	   (eq this-command 'isearch-printing-char))
-      (scim-isearch-process-search-characters last-char)
+      (if scim-imcontext-status
+	  (scim-isearch-process-search-characters last-char)
+	(let ((scim-imcontext-temporary-for-minibuffer nil))
+	  (remove-hook 'post-command-hook 'scim-check-current-buffer)
+	  (unwind-protect
+	      ad-do-it
+	    (add-hook 'post-command-hook 'scim-check-current-buffer))))
     ad-do-it))
 
 ;; Commands and functions
