@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.8")
+(defconst scim-mode-version "0.8.2.9")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -231,7 +231,7 @@
 (defgroup scim nil
   "The Smart Common Input Method platform"
   :prefix "scim-"
-  :group 'editing :group 'wp)
+  :group 'editing :group 'wp :group 'i18n)
 
 ;; Basic settings
 (defgroup scim-basic nil
