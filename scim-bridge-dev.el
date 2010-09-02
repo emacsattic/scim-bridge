@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.10")
+(defconst scim-mode-version "0.8.2.11")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2951,7 +2951,7 @@ i.e. input focus is in this window."
 	    (if simulate
 		(setq this-command 'self-insert-command))
 	    (insert-and-inherit text))
-	   ;; Normal commit (Undoing will be performed every 20 characters)
+	   ;; Normal commit (Undoing will be performed every 20 columns)
 	   (t
 	    (if simulate
 		(setq this-command 'self-insert-command))
