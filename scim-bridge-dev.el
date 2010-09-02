@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.9")
+(defconst scim-mode-version "0.8.2.10")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2925,23 +2925,37 @@ i.e. input focus is in this window."
    ((not scim-string-insertion-failed)
     (scim-remove-preedit)
     (condition-case err
-	(progn
+	(let* ((text scim-committed-string)
+	       (simulate (and (not scim-preediting-p)
+			      (eq this-command 'scim-handle-event)
+			      (= (length text) 1)
+			      (eq (string-to-char text) last-command-event))))
 	  (cond
 	   ;; ansi-term
 	   ((and (eq major-mode 'term-mode)
 		 (get-buffer-process (current-buffer)))
+	    (if simulate
+		(setq this-command 'term-send-raw))
 	    (with-no-warnings
-	      (term-send-raw-string scim-committed-string)))
+	      (term-send-raw-string text)))
 	   ;; table-mode
 	   ((and (featurep 'table)
 		 (with-no-warnings table-mode-indicator))
-	    (scim-*table--cell-insert scim-committed-string))
+	    (if simulate
+		(progn
+		  (setq this-command '*table--cell-self-insert-command)
+		  (*table--cell-self-insert-command))
+	      (scim-*table--cell-insert text)))
 	   ;; Normal commit
 	   (scim-undo-by-committed-string
-	    (insert-and-inherit scim-committed-string))
+	    (if simulate
+		(setq this-command 'self-insert-command))
+	    (insert-and-inherit text))
 	   ;; Normal commit (Undoing will be performed every 20 characters)
 	   (t
-	    (scim-insert-and-modify-undo-list scim-committed-string)))
+	    (if simulate
+		(setq this-command 'self-insert-command))
+	    (scim-insert-and-modify-undo-list text)))
 	  (setq scim-last-command 'self-insert-command)
 	  (scim-string-commited)
 	  (run-hooks 'scim-commit-string-hook))
@@ -3194,7 +3208,9 @@ i.e. input focus is in this window."
   (interactive "*p")
   (unless (eq last-command 'scim-handle-event)
     (setq scim-last-command last-command))
-  (scim-dispatch-key-event last-command-event))
+  (scim-dispatch-key-event last-command-event)
+  (if scim-preediting-p
+      (setq this-command 'scim-handle-event)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Setup incremental search
