@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.11")
+(defconst scim-mode-version "0.8.2.12")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -41,6 +41,15 @@
 ;; This program is *not* a part of SCIM-Bridge.
 
 ;;
+;; Requirements:
+;;
+;;  * GNU Emacs 22 or 23
+;;  * SCIM-Bridge agent (Version 0.4.13 or later)
+;;
+;; Note that scim-mode works only when Emacs is running under X session.
+;;
+
+;;
 ;; Installation:
 ;;
 ;; First, save this file as scim-bridge.el and byte-compile in
@@ -71,10 +80,6 @@
 ;;   (scim-define-common-key ?\C-/ nil)
 ;;   ;; Change cursor color depending on SCIM status
 ;;   (setq scim-cursor-color '("red" "blue" "limegreen"))
-;;
-;;
-;; Note that this program requires GNU Emacs 22 or later, and
-;; works only when Emacs is running under X session.
 ;;
 
 ;;; History:
@@ -259,9 +264,7 @@ is ineffectual unless `scim-mode-local' is non-nil."
       (scim-setup-isearch)))
 
 (defcustom scim-use-in-isearch-window t
-  "Non-nil means SCIM can be used together with isearch-mode.
-
-Note that this option requires SCIM-Bridge version 0.4.13 or later."
+  "Non-nil means SCIM can be used together with isearch-mode."
   :set 'scim-customize-isearch
   :type 'boolean
   :group 'scim-basic)
@@ -275,10 +278,7 @@ Note that this option requires SCIM-Bridge version 0.4.13 or later."
 (defcustom scim-use-minimum-keymap t
   "If non-nil, ASCII character events are not handled when SCIM is off.
 This option is useful for avoiding conflict with the other Emacs-Lisp
-programs.
-
-NOTICE: Don't activate this option if SCIM-Bridge version in your system
-is older than 0.4.13, otherwise SCIM cannot receive your inputs."
+programs."
   :set 'scim-customize-key
   :type 'boolean
   :group 'scim-basic)
@@ -476,9 +476,7 @@ If the value is a string, specify the cursor color applied when SCIM is
 on. If a cons cell, its car and cdr are the cursor colors which indicate
 that SCIM is on and off, respectively. If a list, the first, second and
 third (if any) elements correspond to that SCIM is on, off and disabled,
-respectively. The value nil means don't change the cursor color at all.
-
-Note that this option requires SCIM-Bridge version 0.4.13 or later."
+respectively. The value nil means don't change the cursor color at all."
   :set 'scim-customize-cursor-color
   :type '(choice (const :tag "none (nil)" nil)
 		 (color :tag "red" :format "red (%{sample%})\n" :value "red")
@@ -598,10 +596,9 @@ represents scim-mode."
 When SCIM is off or input focus is in the other application, the slower
 time cycle given by `scim-focus-update-interval-long' is used instead.
 
-Note that this value is not used if SCIM-Bridge version in your system
-is older than 0.4.13 or your window manager does not support a property
-`_NET_ACTIVE_WINDOW'. In that case, `scim-focus-update-interval-long'
-is used at all times."
+Note that this value is not used if your window manager does not
+support a root window's property `_NET_ACTIVE_WINDOW'. In that case,
+`scim-focus-update-interval-long' is used at all times."
   :type 'number
   :group 'scim-expert)
 
