@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-en-version "0.8.2.12")
+(defconst scim-bridge-en-version "0.8.2.13")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -378,7 +378,9 @@ input focus is in the other application.")
 of keysym corresponding to Japanese kana-RO key. The value nil means don't
 use the substitutive keysym. scim-mode modifies X's keymap according to
 this option in order to distinguish backslash key from yen-mark key. This
-option is ineffectual unless using jp-106 keyboard.")
+option is ineffectual unless using jp-106 keyboard."
+ '(choice (string :tag "keysym name" :value "F24")
+	  (const :tag "none" nil)))
 
 (scim-set-variable-doc
  'scim-kana-ro-key-symbol
@@ -386,7 +388,8 @@ option is ineffectual unless using jp-106 keyboard.")
 The value nil means don't use that key. If setting `scim-kana-ro-x-keysym'
 a substitutive X keysym, you must specify the event corresponding to that
 keysym. This option is ineffectual unless using jp-106 keyboard."
- '(choice (symbol)
+ '(choice (symbol :tag "symbol" :value 'f24)
+	  (integer :tag "character code (integer)" :value ?_)
 	  (const :tag "none" nil)))
 
 (scim-set-variable-doc
