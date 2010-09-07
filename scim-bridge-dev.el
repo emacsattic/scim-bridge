@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.12")
+(defconst scim-mode-version "0.8.2.13")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -617,7 +617,8 @@ use the substitutive keysym. scim-mode modifies X's keymap according to
 this option in order to distinguish backslash key from yen-mark key. This
 option is ineffectual unless using jp-106 keyboard."
   :set 'scim-customize-key
-  :type 'string
+  :type '(choice (string :tag "keysym name" :value "F24")
+		 (const :tag "none" nil))
   :group 'scim-expert)
 
 (defcustom scim-kana-ro-key-symbol 'f24
@@ -626,7 +627,8 @@ The value nil means don't use that key. If setting `scim-kana-ro-x-keysym'
 a substitutive X keysym, you must specify the event corresponding to that
 keysym. This option is ineffectual unless using jp-106 keyboard."
   :set 'scim-customize-key
-  :type '(choice (symbol)
+  :type '(choice (symbol :tag "symbol" :value 'f24)
+		 (integer :tag "character code (integer)" :value ?_)
 		 (const :tag "none" nil))
   :group 'scim-expert)
 
