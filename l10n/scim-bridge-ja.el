@@ -6,7 +6,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-bridge-ja-version "0.8.2")
+(defconst scim-bridge-ja-version "0.8.2.13")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -40,6 +40,15 @@
 ;; のためのいくつかの便利なコマンドが使用できるようになります。
 
 ;; このプログラムは SCIM-Bridge の一部ではありません。
+
+;;
+;; Requirements:
+;;
+;;  * GNU Emacs 22 または 23
+;;  * SCIM-Bridge agent (Version 0.4.13 以降)
+;;
+;; 注意：scim-modeはEmacsがXセッション下で実行中にのみ動作します。
+;;
 
 ;;
 ;; Installation:
@@ -82,10 +91,6 @@
 ;;   (global-set-key [S-henkan] 'scim-anthy-reconvert-region)
 ;;   ;; SCIM がオフのままローマ字入力してしまった時に、プリエディットに入れ直す
 ;;   (global-set-key [C-henkan] 'scim-transfer-romaji-into-preedit)
-;;
-;;
-;; 注意：このプログラムは GNU Emacs 22 以降のバージョンで動作します。
-;; また、端末エミュレータ上では動作しません。
 ;;
 
 ;; History:
@@ -199,84 +204,81 @@
 
 (scim-set-variable-doc
  'scim-mode-local
- "この値が nil 以外ならば、入力のモードを各バッファごとに切り替えること
-ができるように、IMコンテクストが各々のバッファについて登録されます。そうで
-なければ、入力のモードはグローバルに切り替えられます。")
+ "nil 以外ならば、入力状態を各バッファごとに切り替えることができるように、
+複数の入力コンテクストが使用されます。そうでなければ、入力状態は全ての
+バッファでグローバルに切り替えられます。")
 
 (scim-set-variable-doc
  'scim-imcontext-temporary-for-minibuffer
- "nil 以外ならば、ミニバッファにおける入力では一時的なIMコンテクストが
-用いられるので、常に SCIM がオフの状態で入力が開始されます。このオプション
-は、`scim-mode-local' が活性 (non-nil) である場合のみ有効です。")
+ "nil 以外ならば、ミニバッファにおける入力では一時的な入力コンテクストが
+用いられるので、ミニバッファでは常に SCIM がオフの状態で入力が開始されます。
+このオプションは、`scim-mode-local' が活性 (non-nil) である場合のみ有効です。")
 
 (scim-set-variable-doc
  'scim-use-in-isearch-window
- "nil 以外ならば、isearch-mode で SCIM が使用できます。そうでなければ、
-使用できません。
-
-注意：このオプションは SCIM-Bridge の バージョン 0.4.13 以降を必要とします。")
+ "nil 以外ならば、isearch-mode で SCIM が使用できます。")
 
 (scim-set-variable-doc
  'scim-use-minimum-keymap
- "nil 以外ならば、SCIM がオフの時に印字可能文字のキーイベントは SCIM では
-処理されません。このオプションは他の Emacs Lisp ライブラリとの衝突を回避する
-のに役立ちます。
-
-注意：もし SCIM-Bridge のバージョンが 0.4.13 よりも古いなら、このオプション
-を活性化しないでください。さもないと、SCIM はキー入力を受け取れません。")
+ "nil 以外ならば、SCIM がオフの時にASCII文字のキーイベントは SCIM では
+処理されません。このオプションは他の Emacs Lisp プログラムとの衝突を避ける
+ために役立ちます。")
 
 (scim-set-variable-doc
  'scim-common-function-key-list
- "直接入力時及びプリエディット時において、SCIM がどのキーイベントを
-受けとるかを表すリストです。このリストへの要素の追加・削除は、関数
-`scim-define-common-key' を用いて行うこともできます。
-注意：このオプションでは ESC や C-x などのプレフィックスキーを設定しないで
-ください。もし設定すると、Emacs が操作不能になるかもしれません。")
+ "SCIM が入力状態に関らず受け取ることができるキーストロークのリストです。
+このリストへの要素の追加・削除のために、関数 `scim-define-common-key' を
+使うことができます。
+
+警告：このオプションに ESC や C-x などのプレフィックスキーを設定しないで
+ください。もし設定すると、これらのプレフィックスで始まるキーシーケンスが
+使用できなくなります。")
 
 (scim-set-variable-doc
  'scim-preedit-function-key-list
- "プリエディット領域が存在する時に、SCIM がどのキーイベントを
-受けとるかを表すリストです。このリストへの要素の追加・削除は、関数
-`scim-define-preedit-key' を用いて行うこともできます。")
+ "SCIM がプリエディット中に受け取ることができるキーストロークのリストです。
+このリストへの要素の追加・削除のために、関数 `scim-define-preedit-key' を
+使うことができます。")
 
 (scim-set-variable-doc
  'scim-use-kana-ro-key
- "もし jp-106 キーボードを用いて日本語のかな入力方式を行うなら、この
-オプションをオン(nil 以外)にして、シフトキーを押さなくても仮名文字の「ろ」
-を入力できるようにしてください。
-　このオプションは、Xウインドウシステムの設定をシェルコマンドの `xmodmap' を
-用いて一時的に書き換えることによって有効化されます。")
+ "nil 以外ならば、jp-106 キーボードを用いて日本語のかな入力方式を行うときに
+シフトキーを押さなくても仮名文字の「ろ」を入力することができます。
+
+このオプションは、X のキーマップを変更するためにシェルコマンドの \"xmodmap\"
+を用います。")
 
 (scim-set-variable-doc
  'scim-simultaneous-pressing-time
- "もし SCIM-Anthy で日本語の親指シフト入力方式を使用するなら、
-SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間隔（秒）を指定して
-下さい。この時間内の2つのキー入力は、同時キー入力として SCIM に送られます。"
+ "2つのキーストロークを同時打鍵として認識する最小の時間間隔（秒）です。
+値が nil ならば、全てのキーストロークが別々のものとして認識されます。
+
+もし SCIM-Anthy で日本語の親指シフト入力方式を使用するなら、この時間間隔を
+指定しなければなりません。"
  '(choice (const :tag "なし" nil)
-	  (number :tag "間隔（秒）"
-		  :value 0.1)))
+	  (number :tag "間隔（秒）" :value 0.1)))
 
 (scim-set-variable-doc
  'scim-undo-by-committed-string
- "この値が nil ならば、アンドゥは確定した文字列が短ければ20カラムを越え
-ない範囲でまとめて行われ、確定した文字列が長ければ20カラム毎に分割して行われ
-ます。値が nil 以外であれば、アンドゥは確定した文字列毎に行われます。")
+ "nil 以外ならば、アンドゥは確定した文字列毎に行われます。
+そうでなければ、確定文字列の挿入は、`self-insert-command' をシミュレートする
+ようにアンドゥ境界を毎回修正するので、アンドゥはおよそ20カラム毎に行われます。")
 
 (scim-set-variable-doc
  'scim-clear-preedit-when-unexpected-event
- "この値が nil 以外ならば、プリエディット中に予期せぬイベントが発生した
-場合に、プリエディット領域が消去されます。予期せぬイベントとは、例えばマウス
-を使った文字列の貼り付けなどです。")
+ "nil 以外ならば、プリエディット中に予期せぬイベントが発生した場合に
+プリエディット領域が消去されます。予期せぬイベントとは、例えばマウスクリック
+による文字列の貼り付けなどです。")
 
 ;; Appearance
 
 (scim-set-group-doc
  'scim-appearance
- "外観の設定（フェイス、変換候補ウインドウなど）")
+ "外観の設定（フェイス、候補ウインドウなど）")
 
 (scim-set-face-doc
  'scim-preedit-default-face
- "このフェイスはプリエディット領域の全体を表します。")
+ "プリエディット領域の全体を表すフェイスです。")
 
 (scim-set-face-doc
  'scim-preedit-underline-face
@@ -295,13 +297,12 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 
 (scim-set-variable-doc
  'scim-cursor-color
- "値が文字列ならば、SCIM がオンである時に適用されるカーソル色を表します。
+ "SCIM の状態に対応するカーソルの色を指定します。
+値が文字列ならば、SCIM がオンである時に適用されるカーソル色を表します。
 コンスセルならば、その car および cdr はそれぞれ SCIM がオンあるいはオフである
 時のカーソル色となります。リストならば、第1要素、第2要素、および第3要素（もし
 あれば）はそれぞれ、SCIM がオン、オフ、および無効化の状態に対応します。
-値が nil ならば、カーソル色の制御は全く行われません。
-
-注意：このオプションは SCIM-Bridge の バージョン 0.4.13 以降を必要とします。"
+値が nil ならば、カーソル色は全く変更されません。"
  ;; ** Don't translate `:value' properties!! **
  '(choice (const :tag "なし（nil）" nil)
 	  (color :tag "赤" :format "赤 (%{sample%})\n" :value "red")
@@ -322,9 +323,8 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 
 (scim-set-variable-doc
  'scim-isearch-cursor-type
- "このオプションは isearch-mode の活性化時に適用されるカーソル形状を指定し
-ます。値が整数の 0 であると、このオプションは不活性となり、カーソル形状は変え
-られません。。
+ "isearch-mode の時に適用されるカーソル形状です。
+値が整数の 0 であれば、カーソル形状は変更されません。
 `cursor-type' をご覧下さい。"
  '(choice (const :tag "指定しない（0）" 0)
 	  (const :tag "フレームのパラメータを使用" t)
@@ -342,9 +342,8 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 
 (scim-set-variable-doc
  'scim-cursor-type-for-candidate
- "このオプションはプリエディット領域に変換候補が表示されている時に適用され
-るカーソル形状を指定します。値が整数の 0 であると、このオプションは不活性と
-なり、カーソル形状は変えられません。
+ "プリエディット領域に変換候補が表示されている時に適用されるカーソル形状です。
+値が整数の 0 であれば、カーソル形状は変更されません。
 `cursor-type' をご覧下さい。"
  '(choice (const :tag "指定しない（0）" 0)
 	  (const :tag "フレームのパラメータを使用" t)
@@ -362,34 +361,34 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 
 (scim-set-variable-doc
  'scim-put-cursor-on-candidate
- "プリエディット領域に変換候補が表示されている時、このオプションが nil
-以外ならば選択している文節にカーソルが表示されます。そうでなければ、カーソルは
+ "nil 以外ならば、プリエディット領域の選択中の文節にカーソルを表示します。
+そうでなければ、プリエディット領域に変換候補が表示されている時、カーソルは
 プリエディット領域の末尾に置かれます。")
 
 (scim-set-variable-doc
  'scim-adjust-window-x-position
- "このオプションは、変換候補ウインドウの位置を、ウインドウ内の変換候補が
-プリエディット領域の変換候補と垂直方向に並ぶように調整するかどうかということを
-指定します。この値が `gnome' ならば、GNOMEデスクトップ環境でのフォントサイズ
-の設定値を用いて調整します。一方、値が整数で与えられると、その数はウインドウを
-通常の位置からずらす量をピクセル数で表します。
-　このオプションは、候補ウインドウが常時表示されるようなタイプの入力方法、
-例えば SCIM-pinyin（中国語）等には適していません。なぜなら、入力位置が
-画面の下の方にある時には候補ウインドウがカーソルを覆い隠してしまう可能性が
-あるからです。"
+ "候補ウインドウを表示する水平位置を指定します。
+nil ならば通常の位置に表示します。整数ならば、候補ウィンドウが通常の位置より
+も何ピクセル左方に表示されるかを示します。値が `gnome' ならば、整数値の代わり
+にGNOMEデスクトップ環境のフォントサイズを使用します。
+
+注意：このオプションは、候補ウインドウが常時表示されるようなタイプの入力方法、
+例えば SCIM-pinyin 等には適していません。なぜなら、入力位置が画面の下の方に
+ある時に、候補ウインドウがカーソルを覆い隠してしまう可能性があるからです。"
  '(choice (const :tag "GNOME のフォント設定を利用" gnome)
 	  (integer :tag "ピクセル数を指定" :value 24)
 	  (const :tag "off" nil)))
 
 (scim-set-variable-doc
  'scim-prediction-window-position
- "(日本語入力時のみ) この変数の値は (POS . ADJ) というコンスセルの形で与
-えられます。もし POS の値が が nil 以外ならば、予測候補ウインドウがプリエディ
-ット領域の先頭部分の下に表示されます。ADJ の値が nil 以外ならば、水平方向の
-位置が変換候補ウインドウと同じように微調整されます。"
+ "SCIM-Anthy等のインプットメソッドの、予測候補ウインドウを表示する位置を
+指定します。値は (POS . ADJ) のようなコンスセルでなければなりません。もし
+POS が nil でなければ、ウインドウはプリエディット領域の先頭に表示されます。
+ADJ が nil でなければ、ウインドウの水平位置は `scim-adjust-window-x-position'
+と同様に調整されます。"
  '(cons
    (choice :tag "位置（POS）"
-	   (const :tag "プリエディット領域の末尾" nil)
+	   (const :tag "カーソルの直下" nil)
 	   (const :tag "プリエディット領域の先頭" t))
    (choice :tag "微調整（ADJ）"
 	   (const :tag "変換候補ウインドウと同様にする" t)
@@ -397,9 +396,9 @@ SCIM-Anthy の設定における「同時打鍵時間」に相当する時間間
 
 (scim-set-variable-doc
  'scim-mode-line-string
- "この変数はscim-modeがアクティブである時にモードラインに表示され、そう
-でない時には表示されない文字列を指定します。この文字列は、空白文字で始まり、
-scim-modeを表すような短い文字列でなければなりません。")
+ "scim-mode がアクティブである時にモードラインに表示される文字列です。
+この文字列は、空白文字で始まり、scim-mode を表すような短い文字列でなければ
+なりません。")
 
 ;; Advanced settings
 
@@ -409,43 +408,57 @@ scim-modeを表すような短い文字列でなければなりません。")
 
 (scim-set-variable-doc
  'scim-focus-update-interval
- "ウインドウのフォーカスを監視する周期を秒単位で指定します。
+ "フレームのフォーカスを周期的に監視する時間間隔（秒）です。
 SCIM がオフの時、あるいは入力フォーカスが他のアプリケーションにある時は、
-`scim-focus-update-interval-long' で指定されたより遅い時間間隔が代わりに
+`scim-focus-update-interval-long' で指定される、より遅い時間周期が代わりに
 用いられます。
 
-注意：もし SCIM-Bridge のバージョンが 0.4.13 よりも古いか、お使いのウインドウ
-マネージャが `_NET_ACTIVE_WINDOW' プロパティをサポートしていないと、この値は
-用いられません。その場合は、常に `scim-focus-update-interval-long' の値が使用
-されます。")
+注意：もしお使いのウインドウマネージャが、ルートウインドウの
+`_NET_ACTIVE_WINDOW' プロパティをサポートしていなければ、この値は用いられま
+せん。その場合は、常に`scim-focus-update-interval-long' の値が使用されます。")
 
 (scim-set-variable-doc
  'scim-focus-update-interval-long
- "この値は入力フォーカスの監視のための遅い時間周期として、
-`scim-focus-update-interval' の代わりに用いられる事があります。
-
-詳細は `scim-focus-update-interval' をご覧ください。")
+ "`scim-focus-update-interval' の代わりに用いられる、フレームのフォーカス
+を周期的に監視するもう一つの時間間隔です。秒単位で指定します。これは、SCIM が
+オフまたは入力フォーカスが他のアプリケーションにある時に使われる時間間隔です。")
 
 (scim-set-variable-doc
  'scim-kana-ro-x-keysym
- "日本語の「ろ」キーが使用される場合、Xウインドウシステムにおいてこのキー
-に割り当てる KeySym の名前を指定します。このプログラムはバックスラッシュキー
-を円記号(￥)キーと区別するために、バックスラッシュキーに代替の KeySym を設定
-します。")
+ "日本語の「ろ」キーに対応する X KeySym の代替として用いる KeySym の
+名前を指定する文字列です。値が nil の場合は、代替の KeySym は使われません。
+scim-mode はこのオプションに従って、バックスラッシュキーを円記号(￥)キーと
+区別するために、バックスラッシュキーに代替の KeySym を設定します。この
+オプションは、jp-106 キーボードを使用する場合にのみ有効です。"
+ '(choice (string :tag "KeySym 名" :value "F24")
+	  (const :tag "なし" nil)))
 
 (scim-set-variable-doc
  'scim-kana-ro-key-symbol
- "日本語の「ろ」キーが使用される場合、`scim-kana-ro-x-keysym' によって
-このキーに与えられた KeySym に対応するイベントのシンボルを指定します。
-このプログラムはバックスラッシュキーを円記号(￥)キーと区別するために、
-バックスラッシュキーに代替の KeySym を設定します。"
- '(choice (symbol :tag "シンボル")
+ "日本語の「ろ」キーのイベントを指定するシンボルまたは整数です。
+値が nil の場合は、「ろ」キーを使用できません。もし `scim-kana-ro-x-keysym' に
+代替の KeySym が設定されるならば、その KeySym に対応するイベントを指定しなけれ
+ばなりません。このオプションは、jp-106 キーボードを使用する場合にのみ有効です。"
+ '(choice (symbol :tag "シンボル" :value 'f24)
+	  (integer :tag "文字コード（整数）" :value ?_)
 	  (const :tag "なし" nil)))
 
 (scim-set-variable-doc
  'scim-bridge-timeout
- "SCIM からのデータ受信のための最大の待ち時間を指定します。浮動小数点の数
+ "SCIM からのデータを受け取るための最大の待ち時間です。浮動小数点の数
 ならば秒数を表し、整数ならばミリ秒を表します。")
+
+(scim-set-variable-doc
+ 'scim-start-scim-bridge
+ "SCIM-Bridge デーモンが実行中でない場合の挙動を指定します。
+nil ならば何もしないので、scim-mode は即時終了します。関数ならば、もしその
+関数が nil 以外を返せばデーモンを自動的に開始します。それ以外の nil でない
+値ならば、無条件でデーモンを開始します。"
+ '(choice (const :tag "何もしない (nil)" nil)
+	  (const :tag "SCIM-Bridge を起動 (t)" t)
+	  (function :tag "関数に従う"
+		    (lambda ()
+		      (equal (getenv "GTK_IM_MODULE") "scim-bridge")))))
 
 (scim-set-variable-doc
  'scim-bridge-x-display-substitute
