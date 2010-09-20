@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.13")
+(defconst scim-mode-version "0.8.2.14")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2924,37 +2924,29 @@ i.e. input focus is in this window."
    ((not scim-string-insertion-failed)
     (scim-remove-preedit)
     (condition-case err
-	(let* ((text scim-committed-string)
-	       (simulate (and (not scim-preediting-p)
-			      (eq this-command 'scim-handle-event)
-			      (= (length text) 1)
-			      (eq (string-to-char text) last-command-event))))
+	(if (and (not scim-preediting-p)
+		 (eq this-command 'scim-handle-event)
+		 (= (length scim-committed-string) 1)
+		 (eq (string-to-char scim-committed-string) last-command-event))
+	    (let ((scim-last-command-event last-command-event))
+	      (scim-key-event-handled "false")
+	      (scim-string-commited))
 	  (cond
 	   ;; ansi-term
 	   ((and (eq major-mode 'term-mode)
 		 (get-buffer-process (current-buffer)))
-	    (if simulate
-		(setq this-command 'term-send-raw))
 	    (with-no-warnings
-	      (term-send-raw-string text)))
+	      (term-send-raw-string scim-committed-string)))
 	   ;; table-mode
 	   ((and (featurep 'table)
 		 (with-no-warnings table-mode-indicator))
-	    (if simulate
-		(progn
-		  (setq this-command '*table--cell-self-insert-command)
-		  (*table--cell-self-insert-command))
-	      (scim-*table--cell-insert text)))
+	    (scim-*table--cell-insert scim-committed-string))
 	   ;; Normal commit
 	   (scim-undo-by-committed-string
-	    (if simulate
-		(setq this-command 'self-insert-command))
-	    (insert-and-inherit text))
+	    (insert-and-inherit scim-committed-string))
 	   ;; Normal commit (Undoing will be performed every 20 columns)
 	   (t
-	    (if simulate
-		(setq this-command 'self-insert-command))
-	    (scim-insert-and-modify-undo-list text)))
+	    (scim-insert-and-modify-undo-list scim-committed-string)))
 	  (setq scim-last-command 'self-insert-command)
 	  (scim-string-commited)
 	  (run-hooks 'scim-commit-string-hook))
