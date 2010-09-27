@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.14")
+(defconst scim-mode-version "0.8.2.15")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2388,7 +2388,8 @@ i.e. input focus is in this window."
 	    (if (stringp scim-imcontext-id)
 		(scim-check-frame-focus t)))
 	  (scim-set-keymap-parent)
-	  (scim-update-cursor-color)))
+	  (unless non-x-p
+	    (scim-update-cursor-color))))
       (setq scim-parent-buffer-group nil)
       ;; Disable keymap if buffer is read-only, explicitly disabled, or vi-mode.
       (if (eq (and (or buffer-read-only
