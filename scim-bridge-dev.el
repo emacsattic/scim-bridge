@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.15")
+(defconst scim-mode-version "0.8.2.16")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2397,6 +2397,9 @@ i.e. input focus is in this window."
 		       (eq major-mode 'vi-mode)
 		       (and (boundp 'vip-current-mode)
 			    (eq vip-current-mode 'vi-mode))
+		       (and (bound-and-true-p vim-mode)
+			    (with-no-warnings
+			      (eq vim:active-mode 'vim:normal-mode)))
 		       (and (boundp 'viper-current-state)
 			    (eq viper-current-state 'vi-state)))
 		   (not (and isearch-mode
