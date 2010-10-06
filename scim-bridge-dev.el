@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.17")
+(defconst scim-mode-version "0.8.2.18")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1321,7 +1321,8 @@ If STRING is empty or nil, the documentation string is left original."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Messages & Log
 (defun scim-log1 (format-string args)
-  (let ((log-str (apply 'format format-string args)))
+  (let ((log-str (concat (format-time-string "%T ")
+			 (apply 'format format-string args))))
     (with-current-buffer (get-buffer-create scim-log-buffer)
       (let ((window (get-buffer-window (current-buffer))))
 	(save-selected-window
@@ -1348,8 +1349,8 @@ If STRING is empty or nil, the documentation string is left original."
       (scim-log1 " 4th: %S" (list (nth 3 buffer-undo-list))))))
 
 (defun scim-message (format-string &rest args)
-  (apply 'message (concat "SCIM: " format-string) args)
-  (apply 'scim-log (concat "message: " format-string) args))
+  (apply 'scim-log (concat "message: " format-string) args)
+  (apply 'message (concat "SCIM: " format-string) args))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Control buffer-undo-list
