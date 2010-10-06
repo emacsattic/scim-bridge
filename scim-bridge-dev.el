@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.16")
+(defconst scim-mode-version "0.8.2.17")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2054,7 +2054,8 @@ i.e. input focus is in this window."
 	(when scim-frame-focus
 	  (scim-frame-top-left-coordinates)
 	  (scim-set-window-x-offset)))
-      (unless focus-in
+      (unless (or focus-in
+		  this-command)
 	(scim-check-current-buffer))))))
 
 (defun scim-cancel-focus-update-timer ()
