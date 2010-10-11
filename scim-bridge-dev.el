@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.18")
+(defconst scim-mode-version "0.8.2.19")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2585,11 +2585,13 @@ i.e. input focus is in this window."
 	      (sec (and (floatp scim-bridge-timeout) scim-bridge-timeout))
 	      (msec (and (integerp scim-bridge-timeout) scim-bridge-timeout)))
 	  (when (= (point-max) 1)
-	    (accept-process-output scim-bridge-socket sec msec t))
+	    (save-current-buffer
+	      (accept-process-output scim-bridge-socket sec msec t)))
 	  (when (and (> (point-max) 1)
 		     (/= (char-before (point-max)) ?\n))
 	    (scim-log "retry data reception")
-	    (accept-process-output scim-bridge-socket sec msec t))
+	    (save-current-buffer
+	      (accept-process-output scim-bridge-socket sec msec t)))
 	  (setq repl (buffer-string))
 	  (erase-buffer)
 	  (scim-log "receive:\n%s" repl)
