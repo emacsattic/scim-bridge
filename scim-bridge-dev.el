@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.19")
+(defconst scim-mode-version "0.8.2.20")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1807,7 +1807,7 @@ restart scim-mode so that this settings may become effective."
 	(orig-frame (selected-frame)))
     (scim-log "set cursor color: %S" color)
     (condition-case err
-	(while (progn
+	(while (save-current-buffer
 		 (unless single-frame
 		   (select-frame (next-frame nil t)))
 		 (when (or (and (eq window-system 'x)
