@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.20")
+(defconst scim-mode-version "0.8.2.21")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -1816,7 +1816,13 @@ restart scim-mode so that this settings may become effective."
 				    scim-current-buffer))
 			   (not scim-mode))
 		   (unless color
-		     (setq color (frame-parameter nil 'foreground-color)))
+		     (let ((spec (or (get 'cursor 'customized-face)
+				     (cadr (assq (car custom-enabled-themes)
+						 (get 'cursor 'theme-face))))))
+		       (setq color (if spec
+				       (cadr (memq :background
+						   (face-spec-choose spec)))
+				     (frame-parameter nil 'foreground-color)))))
 		   (if viper
 		       (with-no-warnings
 			 (setq viper-insert-state-cursor-color color)
