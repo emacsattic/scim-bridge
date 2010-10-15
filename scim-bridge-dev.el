@@ -8,7 +8,7 @@
 ;; Maintainer: S. Irie
 ;; Keywords: Input Method, i18n
 
-(defconst scim-mode-version "0.8.2.21")
+(defconst scim-mode-version "0.8.2.22")
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -2572,7 +2572,7 @@ i.e. input focus is in this window."
 	(set-process-sentinel proc 'scim-bridge-process-sentinel)
 	(with-current-buffer (process-buffer proc)
 	  (scim-log "temp buffer: %S" (current-buffer))
-	  (unless scim-debug (buffer-disable-undo))
+	  (buffer-disable-undo)
 	  (erase-buffer)
 	  ;; `make-local-hook' is an obsolete function (as of Emacs 21.1)
 ;	  (make-local-hook 'after-change-functions)
